@@ -1,0 +1,3 @@
+module Bootlang
+  VERSION = "0.1.0"
+end
