@@ -1,4 +1,4 @@
-require "bootlang/version"
+require 'bootlang/version'
 
 module Bootlang
   class Error < StandardError; end
