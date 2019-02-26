@@ -1,8 +1,16 @@
 require 'bootlang/version'
+require 'langlang'
 
 module Bootlang
 
-  class Error < StandardError; end
+  include LangLang
+
+  def self.translate(source)
+    translator = Translator.new tokenizer: Tokenizer.new,
+                                parser: Parser.new,
+                                renderer: Renderer.new
+    translator.translate source
+  end
 
   class Element
 
@@ -14,25 +22,17 @@ module Bootlang
 
   end
 
-  module Translator
+  class Tokenizer
 
-    def self.translate(source)
-      Renderer.render(Parser.parse(Tokenizer.tokenize(source)))
-    end
-
-  end
-
-  module Tokenizer
-
-    def self.tokenize(source)
+    def tokenize(source)
       source.scan(%r{\A\s*<([A-Za-z0-9]+)>\s*</([A-Za-z0-9]+)>\s*\z})[0]
     end
 
   end
 
-  module Parser
+  class Parser
 
-    def self.parse(tokens)
+    def parse(tokens)
       raise "Expected 2 tokens but found: #{tokens}" if tokens.length != 2
       raise "Expected matching elements but found: #{tokens}" if tokens[0] != tokens[1]
 
@@ -41,9 +41,9 @@ module Bootlang
 
   end
 
-  module Renderer
+  class Renderer
 
-    def self.render(element)
+    def render(element)
       "<div class=\"#{element.name}\"></div>"
     end
 
