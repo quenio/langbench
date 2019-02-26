@@ -2,8 +2,8 @@
 
 module LangLang
 
-  def self.included(target)
-    target.class_eval do
+  def self.included(_module)
+    _module.class_eval do
       def self.translate(source)
         translator = Translator.new tokenizer: Tokenizer.new(regex: self::REGEX),
                                     parser: Parser.new(rule: self::RULE),
