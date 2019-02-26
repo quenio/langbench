@@ -1,5 +1,5 @@
 require 'bundler/setup'
-require 'bootlang'
+require 'boot_lang'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

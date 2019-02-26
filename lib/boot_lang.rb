@@ -1,5 +1,5 @@
 require 'bootlang/version'
-require 'langlang'
+require 'lang_lang'
 
 module BootLang
 
