@@ -1,7 +1,7 @@
 require 'bootlang/version'
 require 'langlang'
 
-module Bootlang
+module BootLang
 
   include LangLang
 

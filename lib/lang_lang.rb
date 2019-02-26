@@ -1,4 +1,4 @@
-# langlang.rb
+# lang_lang.rb
 
 module LangLang
 

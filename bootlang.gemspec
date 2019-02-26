@@ -5,7 +5,7 @@ require 'bootlang/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'bootlang'
-  spec.version       = Bootlang::VERSION
+  spec.version       = BootLang::VERSION
   spec.authors       = ['Quenio dos Santos']
   spec.email         = ['queniodossantos@gmail.com']
 

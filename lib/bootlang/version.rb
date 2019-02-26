@@ -1,3 +1,3 @@
-module Bootlang
+module BootLang
   VERSION = '0.1.0'.freeze
 end
