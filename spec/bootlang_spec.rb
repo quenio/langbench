@@ -1,9 +1,7 @@
-RSpec.describe Bootlang do
-  it 'has a version number' do
-    expect(Bootlang::VERSION).not_to be nil
-  end
-
-  it 'does something useful' do
-    expect(false).to eq(true)
+RSpec.describe Bootlang::Translator do
+  it 'translates the layout elements to a div' do
+    given_source = '<container></container>'
+    expected_target = '<div class="container"></div>'
+    expect(Bootlang::Translator.translate(given_source)).to eq(expected_target)
   end
 end
