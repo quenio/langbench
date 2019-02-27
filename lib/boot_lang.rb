@@ -12,7 +12,11 @@ module BootLang
   grammar start: :element,
           element: %i[open close],
           open: %w['<' :id '>'],
-          close: %w['</' id '>']
+          close: %w['</' :id '>']
+
+  on :open do |tokens, model|
+    model.root = Element.new(tokens[:id])
+  end
 
   RULE = lambda do |tokens|
     raise "Expected 2 tokens but found: #{tokens}" if tokens.length != 2

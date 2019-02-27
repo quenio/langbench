@@ -16,13 +16,16 @@ module LangLang
       @tokenizer_options = (@tokenizer_options ||= {}).merge(rules: rules)
     end
 
-    def grammar(_rules = {})
+    def grammar(rules = {})
+      @parser_options = (@parser_options ||= {}).merge(grammar: rules)
+    end
 
+    def on(_rule_id, &_action)
     end
 
     def translate(source)
       translator = Translator.new tokenizer: Tokenizer.new(@tokenizer_options),
-                                  parser: Parser.new(rule: self::RULE),
+                                  parser: Parser.new(@parser_options),
                                   renderer: Renderer.new(template: self::TEMPLATE)
       translator.translate source
     end
@@ -99,15 +102,25 @@ module LangLang
 
   class Parser
 
-    attr_reader :rule
+    attr_reader :grammar
 
     def initialize(options = {})
-      @rule = options[:rule]
+      @grammar = options[:grammar]
     end
 
     def parse(tokens)
       # @rule.call(tokens)
       tokens
+    end
+
+    def recognize(tokens)
+      start_ch = @grammar[:element].first
+      end_ch = @grammar[:element].last
+      if tokens&.first == { char: start_ch }
+        tokens&.last == { char: end_ch } ? [] : [{ missing: end_ch }]
+      else
+        [{ missing: start_ch }]
+      end
     end
 
   end
