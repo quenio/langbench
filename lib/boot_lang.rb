@@ -5,7 +5,14 @@ module BootLang
 
   include LangLang
 
-  REGEX = %r{\A\s*<([A-Za-z0-9]+)>\s*</([A-Za-z0-9]+)>\s*\z}.freeze
+  skip /\s*/
+
+  tokens id: /[A-Za-z0-9]+/
+
+  grammar start: :element,
+          element: %i[open close],
+          open: %w['<' :id '>'],
+          close: %w['</' id '>']
 
   RULE = lambda do |tokens|
     raise "Expected 2 tokens but found: #{tokens}" if tokens.length != 2
