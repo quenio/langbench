@@ -14,6 +14,8 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/quenio/bootlang'
   spec.license       = 'MIT'
 
+  spec.required_ruby_version = '>= 2.6.0'
+
   raise 'RubyGems 2.0 or newer is required.' unless spec.respond_to?(:metadata)
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -35,4 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
+
+  # https://github.com/rantly-rb/rantly
+  spec.add_development_dependency 'rantly', '~> 2.0.0'
 end
