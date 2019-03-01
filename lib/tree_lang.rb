@@ -2,50 +2,78 @@
 
 module TreeLang
 
-  class XmlPrinter
-
-    def initialize
-      @indent = ''
-    end
+  module Structure
 
     def node(name, attributes = {}, &block)
-      enter_node(name, attributes)
-      yield_children(&block)
-      exit_node(name)
+      emit_node(name, attributes, &block)
       nil
     end
 
     def content(value)
-      print value
-      @indent_next = false
+      emit_content(value)
       nil
     end
 
     private
 
-    def enter_node(name, attributes)
+    def emit_node(name, attributes = {}, &block)
+      enter_node(name, attributes, &block)
+      emit_children(&block) if block
+      exit_node(name, attributes, &block)
+    end
+
+    def enter_node(_name, _attributes, &_block)
+      raise 'Not implemented.'
+    end
+
+    def exit_node(_name, _attributes, &_block)
+      raise 'Not implemented.'
+    end
+
+    def emit_children
+      value = yield
+      emit_content(value) if value
+    end
+
+    def emit_content(_value)
+      raise 'Not implemented.'
+    end
+
+  end
+
+  class XmlPrinter
+
+    include Structure
+
+    def initialize
+      @indent = ''
+    end
+
+    private
+
+    def emit_content(value)
+      print value
+      @indent_next = false
+    end
+
+    def enter_node(name, attributes, &block)
       print "\n#{@indent}<#{name}"
       attributes.each { |attrib| print " #{attrib[0]}=\"#{attrib[1]}\"" }
       print '>'
+      if block
+        @indent += '  '
+      else
+        @indent_next = false
+      end
     end
 
-    def exit_node(name)
+    def exit_node(name, _attributes, &block)
+      @indent.chomp!('  ') if block
       if @indent_next
         print "\n#{@indent}</#{name}>"
       else
         print "</#{name}>"
         @indent_next = true
-      end
-    end
-
-    def yield_children(&block)
-      if block
-        @indent += '  '
-        value = yield
-        content(value) if value
-        @indent.chomp!('  ')
-      else
-        @indent_next = false
       end
     end
 
