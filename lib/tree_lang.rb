@@ -1,65 +1,45 @@
+require 'visitor'
+require 'xml_template'
 require 'pretty_printer'
 
 module TreeLang
 
-  module Structure
+  class Structure
+
+    def initialize(options = {})
+      @visitor = options[:visitor]
+    end
 
     def node(name, attributes = {}, &block)
-      visit_node(name, attributes, &block)
+      @visitor.visit_node(name, attributes, &block)
       nil
     end
 
     def content(value)
-      visit_content(value)
+      @visitor.visit_content(value)
       nil
-    end
-
-    private
-
-    def visit_node(name, attributes = {}, &block)
-      enter_node(name, attributes, &block)
-      visit_children(&block) if block
-      exit_node(name, attributes, &block)
-    end
-
-    def enter_node(_name, _attributes, &_block)
-      raise 'Not implemented.'
-    end
-
-    def exit_node(_name, _attributes, &_block)
-      raise 'Not implemented.'
-    end
-
-    def visit_children
-      value = yield
-      visit_content(value) if value
-    end
-
-    def visit_content(_value)
-      raise 'Not implemented.'
     end
 
   end
 
   class XmlPrinter
 
-    include Structure
+    include Visitor
+    include XmlTemplate
     include PrettyPrinter
-
-    private
 
     def initialize
       init_indentation
     end
 
     def visit_content(value)
-      print value
+      print inner_content(value)
       inline
     end
 
     def enter_node(name, attributes, &block)
       enter_section
-      indent_print "<#{name}#{attrib_text(attributes)}>"
+      indent_print open_markup(name, attributes)
       if block
         indent
       else
@@ -67,15 +47,9 @@ module TreeLang
       end
     end
 
-    def attrib_text(attributes)
-      result = attributes.map { |attrib| "#{attrib[0]}=\"#{attrib[1]}\"" }.join(' ')
-      result = ' ' + result unless result.empty?
-      result
-    end
-
     def exit_node(name, _attributes, &block)
       unindent if block
-      indent_print "</#{name}>"
+      indent_print close_markup(name)
       exit_section
     end
 
@@ -85,7 +59,8 @@ module TreeLang
 
   def self.print(options = {}, &block)
     format = options[:to]
-    @printer[format].new.instance_eval &block
+    printer = @printer[format].new
+    Structure.new(visitor: printer).instance_eval &block
   end
 
 end
