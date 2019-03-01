@@ -41,48 +41,80 @@ module TreeLang
 
   end
 
-  class XmlPrinter
+  module PrettyPrinter
 
-    include Structure
-
-    def initialize
+    def init_indentation
       @indent = ''
       @indent_next = true
       @line_changed = [false]
     end
 
-    private
+    def indent_print(value)
+      print @indent_next ? "\n#{@indent}#{value}" : value
+    end
 
-    def emit_content(value)
-      print value
+    def indent
+      @indent += '  '
+    end
+
+    def unindent
+      @indent.chomp!('  ')
+    end
+
+    def inline
       @indent_next = false
     end
 
-    def enter_node(name, attributes, &block)
-      if @indent_next
-        print "\n#{@indent}<#{name}"
-      else
-        print "<#{name}"
-      end
+    def enter_section
       @line_changed.push(@indent_next)
-      attributes.each { |attrib| print " #{attrib[0]}=\"#{attrib[1]}\"" }
-      print '>'
-      if block
-        @indent += '  '
+    end
+
+    def exit_section
+      if @indent_next
+        @line_changed.pop
       else
-        @indent_next = false
+        @indent_next = @line_changed.pop
       end
     end
 
-    def exit_node(name, _attributes, &block)
-      @indent.chomp!('  ') if block
-      if @indent_next
-        print "\n#{@indent}</#{name}>"
-        @line_changed.pop
+  end
+
+  class XmlPrinter
+
+    include Structure
+    include PrettyPrinter
+
+    private
+
+    def initialize
+      init_indentation
+    end
+
+    def emit_content(value)
+      print value
+      inline
+    end
+
+    def enter_node(name, attributes, &block)
+      enter_section
+      indent_print "<#{name}#{attrib_text(attributes)}>"
+      if block
+        indent
       else
-        print "</#{name}>"
-        @indent_next = @line_changed.pop
+        inline
       end
+    end
+
+    def attrib_text(attributes)
+      result = attributes.map { |attrib| "#{attrib[0]}=\"#{attrib[1]}\"" }.join(' ')
+      result = ' ' + result unless result.empty?
+      result
+    end
+
+    def exit_node(name, _attributes, &block)
+      unindent if block
+      indent_print "</#{name}>"
+      exit_section
     end
 
   end
