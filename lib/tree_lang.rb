@@ -5,20 +5,20 @@ module TreeLang
   module Structure
 
     def node(name, attributes = {}, &block)
-      emit_node(name, attributes, &block)
+      visit_node(name, attributes, &block)
       nil
     end
 
     def content(value)
-      emit_content(value)
+      visit_content(value)
       nil
     end
 
     private
 
-    def emit_node(name, attributes = {}, &block)
+    def visit_node(name, attributes = {}, &block)
       enter_node(name, attributes, &block)
-      emit_children(&block) if block
+      visit_children(&block) if block
       exit_node(name, attributes, &block)
     end
 
@@ -30,12 +30,12 @@ module TreeLang
       raise 'Not implemented.'
     end
 
-    def emit_children
+    def visit_children
       value = yield
-      emit_content(value) if value
+      visit_content(value) if value
     end
 
-    def emit_content(_value)
+    def visit_content(_value)
       raise 'Not implemented.'
     end
 
@@ -52,7 +52,7 @@ module TreeLang
       init_indentation
     end
 
-    def emit_content(value)
+    def visit_content(value)
       print value
       inline
     end
