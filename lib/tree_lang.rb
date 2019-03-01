@@ -47,6 +47,8 @@ module TreeLang
 
     def initialize
       @indent = ''
+      @indent_next = true
+      @line_changed = [false]
     end
 
     private
@@ -57,7 +59,12 @@ module TreeLang
     end
 
     def enter_node(name, attributes, &block)
-      print "\n#{@indent}<#{name}"
+      if @indent_next
+        print "\n#{@indent}<#{name}"
+      else
+        print "<#{name}"
+      end
+      @line_changed.push(@indent_next)
       attributes.each { |attrib| print " #{attrib[0]}=\"#{attrib[1]}\"" }
       print '>'
       if block
@@ -71,9 +78,10 @@ module TreeLang
       @indent.chomp!('  ') if block
       if @indent_next
         print "\n#{@indent}</#{name}>"
+        @line_changed.pop
       else
         print "</#{name}>"
-        @indent_next = true
+        @indent_next = @line_changed.pop
       end
     end
 
