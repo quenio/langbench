@@ -38,6 +38,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
 
+  # RubyMine Debugger
+  spec.add_development_dependency 'debase', '~> 0.2.2'
+  spec.add_development_dependency 'ruby-debug-ide', '~> 0.7.0.beta7'
+
   # https://github.com/rantly-rb/rantly
   spec.add_development_dependency 'rantly', '~> 2.0.0'
 end
