@@ -61,6 +61,7 @@ RSpec.describe LangLang::Parser do
   before do
     @grammars = property_of do
       [
+        sized(5) { string(:alpha) }.to_sym,
         sized(1) { string(:punct) },
         sized(5) { string(:alnum) },
         sized(1) { string(:punct) }
@@ -69,8 +70,13 @@ RSpec.describe LangLang::Parser do
   end
 
   def check
-    @grammars.check do |start_char, id, end_char|
-      @parser = LangLang::Parser.new(grammar: { element: [start_char, id, end_char] })
+    @grammars.check do |element, start_char, id, end_char|
+      rules = {
+        element => %i[part1 part2],
+        part1: [start_char, :id],
+        part2: [end_char]
+      }
+      @parser = LangLang::Parser.new(grammar: rules)
       options = yield start_char, id, end_char
       errors = @parser.recognize(options[:given])
       expect(errors).to eq(options[:expected])
@@ -100,6 +106,15 @@ RSpec.describe LangLang::Parser do
       {
         given: [{ char: start_ch }, { id: id }],
         expected: [{ missing: end_ch }]
+      }
+    end
+  end
+
+  it 'does not recognize a sentence with an extra character' do
+    check do |start_ch, id, end_ch|
+      {
+        given: [{ char: start_ch }, { id: id }, { char: end_ch }, { char: end_ch }],
+        expected: [{ unrecognized: end_ch }]
       }
     end
   end
