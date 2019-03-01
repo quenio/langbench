@@ -83,40 +83,44 @@ RSpec.describe LangLang::Parser do
     end
   end
 
-  it 'recognizes a valid sentence' do
-    check do |start_ch, id, end_ch|
-      {
-        given: [{ char: start_ch }, { id: id }, { char: end_ch }],
-        expected: []
-      }
-    end
-  end
+  describe '#recognize' do
 
-  it 'does not recognize a sentence missing initial character' do
-    check do |start_ch, id, end_ch|
-      {
-        given: [{ id: id }, { char: end_ch }],
-        expected: [{ missing: start_ch }]
-      }
+    it 'recognizes a valid sentence' do
+      check do |start_ch, id, end_ch|
+        {
+          given: [{ char: start_ch }, { id: id }, { char: end_ch }],
+          expected: []
+        }
+      end
     end
-  end
 
-  it 'does not recognize a sentence missing final character' do
-    check do |start_ch, id, end_ch|
-      {
-        given: [{ char: start_ch }, { id: id }],
-        expected: [{ missing: end_ch }]
-      }
+    it 'does not recognize a sentence missing initial character' do
+      check do |start_ch, id, end_ch|
+        {
+          given: [{ id: id }, { char: end_ch }],
+          expected: [{ missing: start_ch }]
+        }
+      end
     end
-  end
 
-  it 'does not recognize a sentence with an extra character' do
-    check do |start_ch, id, end_ch|
-      {
-        given: [{ char: start_ch }, { id: id }, { char: end_ch }, { char: end_ch }],
-        expected: [{ unrecognized: end_ch }]
-      }
+    it 'does not recognize a sentence missing final character' do
+      check do |start_ch, id, end_ch|
+        {
+          given: [{ char: start_ch }, { id: id }],
+          expected: [{ missing: end_ch }]
+        }
+      end
     end
+
+    it 'does not recognize a sentence with an extra character' do
+      check do |start_ch, id, end_ch|
+        {
+          given: [{ char: start_ch }, { id: id }, { char: end_ch }, { char: end_ch }],
+          expected: [{ unrecognized: end_ch }]
+        }
+      end
+    end
+
   end
 
 end
