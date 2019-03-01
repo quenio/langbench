@@ -1,6 +1,7 @@
 require 'visitor'
 require 'xml_template'
 require 'pretty_printer'
+require 'text_renderer'
 
 module TreeLang
 
@@ -57,10 +58,32 @@ module TreeLang
 
   @printer = { xml: XmlPrinter }
 
-  def self.print(options = {}, &block)
+  def self.print(options = {}, &source_code)
     format = options[:to]
-    printer = @printer[format].new
-    Structure.new(visitor: printer).instance_eval &block
+    visit(visitor: @printer[format].new, &source_code)
+  end
+
+  class XmlRenderer < XmlPrinter
+
+    include TextRenderer
+
+    def initialize
+      super
+      init_rendering
+    end
+  end
+
+  @renderer = { xml: XmlRenderer }
+
+  def self.render(options = {}, &source_code)
+    format = options[:to]
+    renderer = @renderer[format].new
+    visit(visitor: renderer, &source_code)
+    renderer.text
+  end
+
+  def self.visit(options = {}, &source_code)
+    Structure.new(visitor: options[:visitor]).instance_eval &source_code
   end
 
 end
