@@ -1,6 +1,5 @@
 require 'visitor'
-require 'pretty_printer'
-require 'text_renderer'
+require 'text'
 
 module XML
 
@@ -30,7 +29,7 @@ module XML
 
     include Visitor
     include Template
-    include PrettyPrinter
+    include Text::Printer
 
     def initialize
       init_indentation
@@ -61,7 +60,7 @@ module XML
 
   class Renderer < Printer
 
-    include TextRenderer
+    include Text::Renderer
 
     def initialize
       super
