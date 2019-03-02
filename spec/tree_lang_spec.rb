@@ -2,9 +2,13 @@ require 'tree_lang'
 
 source_code = TreeLang.source do
   node(:html, lang: 'en') do
-    node(:head) { node(:title) { 'Books' } }
+    node(:head) do
+      node(:title) { 'Books' }
+    end
     node(:body) do
-      node(:div, class: 'header') { node(:img, src: 'logo.png', alt: 'Books Logo') }
+      node(:div, class: 'header') do
+        node(:img, src: 'logo.png', alt: 'Books Logo')
+      end
       node(:div, class: 'main') do
         node(:span, class: 'largeHeading') do
           content 'Favorite'
