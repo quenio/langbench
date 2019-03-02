@@ -1,5 +1,7 @@
 require 'bundler/setup'
-require 'boot_lang'
+require 'rspec'
+require 'rantly'
+require 'rantly/rspec_extensions'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

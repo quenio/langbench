@@ -1,6 +1,3 @@
-require 'rspec'
-require 'rantly'
-require 'rantly/rspec_extensions'
 require 'text'
 
 RSpec.describe Text::Tokenizer do

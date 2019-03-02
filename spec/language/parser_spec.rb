@@ -1,6 +1,3 @@
-require 'rspec'
-require 'rantly'
-require 'rantly/rspec_extensions'
 require 'language'
 
 RSpec.describe Language::Parser do
