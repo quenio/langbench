@@ -1,6 +1,6 @@
 require 'tree_lang'
 
-TreeLang.print(to: :xml) do
+source_code = TreeLang.source do
   node(:html, lang: 'en') do
     node(:head) { node(:title) { 'Books' } }
     node(:body) do
@@ -15,25 +15,18 @@ TreeLang.print(to: :xml) do
   end
 end
 
+source_code.print(to: :xml)
 print "\n\n"
 
-target_code = TreeLang.render(to: :xml) do
-  node(:html, lang: 'en') do
-    node(:head) { node(:title) { 'Books' } }
-    node(:body) do
-      node(:div, class: 'header') { node(:img, src: 'logo.png', alt: 'Books Logo') }
-      node(:div, class: 'main') do
-        node(:span, class: 'largeHeading') do
-          content 'Favorite'
-          node(:b) { 'Books' }
-        end
-      end
-    end
-  end
-end
-
+target_code = source_code.render(to: :xml)
 print target_code
 print "\n\n"
+
+model = source_code.build
+print model.inspect
+print "\n\n"
+
+# source_code.execute
 
 RSpec.describe 'tree_lang' do
   # it 'translates the layout elements to a div' do
