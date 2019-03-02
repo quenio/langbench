@@ -61,12 +61,9 @@ module MPF
             token, *stream = stream
           elsif optional?(parent ||= nil)
             seq = skip(parent, seq)
-            print "\n>>> skip:#{seq.inspect} "
           end
 
-          print "\n>>> before:#{seq.inspect} "
           parent, term, seq = next_term(seq)
-          print "\n>>> after:#{seq.inspect} "
 
           @visitor&.enter_node(term)
           print "\n>>> enter_node(#{term.inspect}) - token: #{token} - parent: #{parent.inspect}"
