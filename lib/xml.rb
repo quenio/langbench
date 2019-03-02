@@ -1,7 +1,35 @@
 require 'visitor'
+require 'language'
 require 'text'
 
 module XML
+
+  module External
+
+    class Syntax
+
+      def initialize
+        @skip = /\s*/
+
+        @tokens = { name: /[A-Za-z0-9]+/ }
+
+        @grammar = {
+          start: :element,
+          element: %i[open close],
+          open: %w['<' :id '>'],
+          close: %w['</' :id '>']
+        }
+      end
+
+      def parse(text, &action)
+        tokenizer = Text::Tokenizer.new(skip: @skip, tokens: @tokens)
+        parser = Language::Parser.new(grammar: @grammar)
+        parser.parse(tokenizer.tokenize(text), &action)
+      end
+
+    end
+
+  end
 
   module Template
 

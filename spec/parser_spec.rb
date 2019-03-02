@@ -1,9 +1,9 @@
 require 'rspec'
 require 'rantly'
 require 'rantly/rspec_extensions'
-require 'parser'
+require 'language'
 
-RSpec.describe Parser do
+RSpec.describe Language::Parser do
 
   before do
     @grammars = property_of do
@@ -23,7 +23,7 @@ RSpec.describe Parser do
         part1: [start_char, :id],
         part2: [end_char]
       }
-      @parser = Parser.new(grammar: rules)
+      @parser = Language::Parser.new(grammar: rules)
       options = yield start_char, id, end_char
       errors = @parser.parse(options[:given])
       expect(errors).to eq(options[:expected])
