@@ -22,7 +22,7 @@ module MPF
           part1: [start_char, :id],
           part2: [end_char]
         }
-        @parser = Language::Parser.new(grammar: rules)
+        @parser = Language::Parser.generate(grammar: rules)
         options = yield start_char, id, end_char
         errors = @parser.parse(options[:given])
         expect(errors).to eq(options[:expected])
@@ -35,7 +35,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ char: start_ch }, { id: id }, { char: end_ch }],
-            expected: []
+            expected: [nil, []]
           }
         end
       end
@@ -44,7 +44,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ id: id }, { char: end_ch }],
-            expected: [{ missing: start_ch }]
+            expected: [nil, [{ missing: start_ch }]]
           }
         end
       end
@@ -53,7 +53,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ char: start_ch }, { id: id }],
-            expected: [{ missing: end_ch }]
+            expected: [nil, [{ missing: end_ch }]]
           }
         end
       end
@@ -62,7 +62,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ char: start_ch }, { id: id }, { char: end_ch }, { char: end_ch }],
-            expected: [{ unrecognized: end_ch }]
+            expected: [nil, [{ unrecognized: end_ch }]]
           }
         end
       end

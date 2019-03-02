@@ -83,6 +83,7 @@ module MPF
           init_parsing(grammar, tokens)
           next_token
           invoke(grammar.first)
+          check_pending_tokens
           [nil, @errors]
         end
       end
@@ -111,17 +112,22 @@ module MPF
 
       def error(options = {})
         @errors << options
+        print "\n>>> Error: #{options.inspect}"
       end
 
       def invoke(rule)
         send(rule.method_name)
       end
 
+      def check_pending_tokens
+        error(unrecognized: text_of(@token)) if @token
+      end
+
       def evaluate(term)
         if non_terminal? term
           invoke(rule_of(term))
         else
-          next_token unless expect?(term)
+          expect?(term)
         end
       end
 
@@ -142,24 +148,16 @@ module MPF
         token.first[0]
       end
 
+      def text_of(token)
+        token.first[1]
+      end
+
       def non_terminal?(term)
         term.is_a? Symbol and rule_of(term)
       end
 
       def rule_of(term)
-        @grammar[raw(term)]
-      end
-
-      def raw(term)
-        if term&.is_a? Symbol
-          term[/\A(\w+)/].to_sym
-        else
-          term
-        end
-      end
-
-      def optional?(term)
-        term&.is_a? Symbol and term.to_s.end_with? '?'
+        @grammar[term]
       end
 
     end
