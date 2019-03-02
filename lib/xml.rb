@@ -12,20 +12,24 @@ module MPF
         def initialize
           @skip = /\s*/
 
-          @tokens = { name: /[A-Za-z0-9]+/ }
+          @tokens = {
+            name: /[A-Za-z0-9]+/,
+            value: /"[A-Za-z0-9]+"/
+          }
 
           @grammar = {
             start: :element,
-            element: %i[open close],
-            open: %w['<' :id '>'],
-            close: %w['</' :id '>']
+            element: %i[open element close],
+            open: ['<', :name, :attributes, '>'],
+            close: ['</', :name, '>'],
+            attributes: [:name, '=', :value]
           }
         end
 
-        def parse(text, &action)
-          tokenizer = Text::Tokenizer.new(skip: @skip, tokens: @tokens)
-          parser = Language::Parser.new(grammar: @grammar)
-          parser.parse(tokenizer.tokenize(text), &action)
+        def parse(options = {})
+          tokenizer = Text::Tokenizer.new(skip: @skip, rules: @tokens)
+          parser = Language::Parser.new(grammar: @grammar, visitor: options[:visitor])
+          parser.parse(tokenizer.tokenize(options[:text]))
         end
 
       end

@@ -30,13 +30,13 @@ module MPF
           @parent = []
         end
 
-        def enter_node(name, attributes, &block)
+        def enter_node(name, attributes = {}, &block)
           node = Node.new(name, attributes)
           @parent.last.children << node unless @parent.empty?
           @parent.push node
         end
 
-        def exit_node(name, _attributes, &block)
+        def exit_node(name, _attributes = {}, &block)
           @root = @parent.pop
         end
 
@@ -137,6 +137,16 @@ module MPF
       builder = Model::Builder.new
       visit visitor: builder, &source_code
       builder.root
+    end
+
+    @syntax = { xml: XML::External::Syntax }
+
+    def self.parse(options = {})
+      builder = Model::Builder.new
+      language = options[:from]
+      syntax = @syntax[language].new
+      errors = syntax.parse(text: options[:text], visitor: builder)
+      [builder.root, errors]
     end
 
     @printer = { xml: XML::Printer }

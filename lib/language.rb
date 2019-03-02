@@ -6,19 +6,18 @@ module MPF
 
       def initialize(options = {})
         @grammar = options[:grammar]
+        @visitor = options[:visitor]
       end
 
-      def parse(tokens, &_action)
+      def parse(tokens)
         rule = @grammar.first
         seq = right_term_of(rule).dup # sequence of first rule
         stream = tokens.dup
         until stream.empty?
           token, *stream = stream
           term, *seq = next_term(seq)
-          while @grammar[term]
-            term, *rest = @grammar[term]
-            seq = rest + seq
-          end
+          @visitor&.enter_node(term)
+          print "\n>>> enter_node(#{term}) - token: #{token}"
           return [{ unrecognized: text_of(token) }] unless term
           return [{ missing: term }] unless token == { char: term } or category_of(token) == term
         end
@@ -63,11 +62,11 @@ module MPF
         exit_node(name, attributes, &block)
       end
 
-      def enter_node(_name, _attributes, &_block)
+      def enter_node(_name, _attributes = {}, &_block)
         raise 'Not implemented.'
       end
 
-      def exit_node(_name, _attributes, &_block)
+      def exit_node(_name, _attributes = {}, &_block)
         raise 'Not implemented.'
       end
 
