@@ -26,6 +26,10 @@ model = source_code.build
 print model.inspect
 print "\n\n"
 
+source_code = TreeLang.emit(from: model)
+source_code.print(to: :xml)
+print "\n\n"
+
 # source_code.execute
 
 RSpec.describe 'tree_lang' do

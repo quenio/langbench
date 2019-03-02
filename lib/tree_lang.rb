@@ -132,6 +132,41 @@ module TreeLang
     Structure.new(visitor: options[:visitor]).instance_eval &source_code
   end
 
+  class CodeEmitter
+
+    attr_reader :root
+
+    def initialize(root)
+      @root = root
+    end
+
+    def emit_code
+      emitter = self
+      TreeLang.source do
+        emitter.emit_node(self, emitter.root)
+      end
+    end
+
+    def emit_node(lang, node)
+      if node.is_a? Node
+        emitter = self
+        lang.node(node.name, node.attributes) do
+          node.children.each { |child| emitter.emit_node(lang, child) }
+          nil
+        end
+      else
+        lang.content(node)
+      end
+    end
+
+  end
+
+  def self.emit(options = {})
+    model = options[:from]
+    emitter = CodeEmitter.new(model)
+    emitter.emit_code
+  end
+
   class Source
 
     def initialize(&source_code)
