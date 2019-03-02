@@ -12,10 +12,10 @@ module MPF
         skip /\s*/
 
         tokens name: /[A-Za-z0-9]+/,
-               value: /"[A-Za-z0-9]+"/
+               value: /"[A-Za-z0-9\s]+"/
 
-        grammar start: :element,
-                element: %i[open element close],
+        grammar start: [:element],
+                element: [:open, :element?, :name?, :close],
                 open: ['<', :name, :attributes?, '>'],
                 close: ['</', :name, '>'],
                 attributes: [:name, '=', :value]

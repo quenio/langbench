@@ -31,7 +31,7 @@ module MPF
             skip: self.class.skip_regex,
             rules: self.class.token_rules
           )
-          parser = Language::Parser.new(
+          parser = Language::Parser.generate(
             grammar: self.class.grammar_rules,
             visitor: options[:visitor]
           )
@@ -44,51 +44,110 @@ module MPF
 
     class Parser
 
-      def initialize(options = {})
-        @grammar = options[:grammar]
-        @visitor = options[:visitor]
-      end
+      class Rule
 
-      def parse(tokens)
-        token_consumed = true
-        rule = @grammar.first
-        seq = right_term_of(rule).dup # sequence of first rule
-        stream = tokens.dup
+        attr_reader :name
+        attr_reader :terms
 
-        until stream.empty?
-          print "\n"
-          if token_consumed
-            token, *stream = stream
-          elsif optional?(parent ||= nil)
-            seq = skip(parent, seq)
-          end
-
-          parent, term, seq = next_term(seq)
-
-          @visitor&.enter_node(term)
-          print "\n>>> enter_node(#{term.inspect}) - token: #{token} - parent: #{parent.inspect}"
-
-          return [{ unrecognized: text_of(token) }] unless term
-          return [{ missing: term }] unless match?(term, token) or optional?(parent)
-
-          token_consumed = match?(term, token)
+        def initialize(name, terms)
+          @name = name
+          @terms = terms
         end
 
-        _parent, term, _seq = next_term(seq)
-        term ? [{ missing: term }] : []
+        def method_name
+          "#{name}_rule"
+        end
+
+      end
+
+      class Grammar
+
+        def self.of(rules)
+          rules.map { |rule| Rule.new(*rule) }
+        end
+
+      end
+
+      def self.generate(options = {})
+        grammar = Grammar.of(options[:grammar])
+        Class.new(Parser) { define_parser(self, grammar) }.new
+      end
+
+      def self.define_parser(parser, grammar)
+        grammar.each { |rule| define_rule(parser, rule) }
+        define_parse(parser, grammar)
+      end
+
+      def self.define_parse(parser, grammar)
+        parser.define_method(:parse) do |tokens|
+          init_parsing(grammar, tokens)
+          next_token
+          invoke(grammar.first)
+          [nil, @errors]
+        end
+      end
+
+      def self.define_rule(parser, rule)
+        parser.define_method(rule.method_name) do
+          print "\n>>> Enter: #{rule.name}"
+          rule.terms.each { |term| evaluate(term) }
+          print "\n>>> Exit: #{rule.name}"
+        end
       end
 
       private
 
-      def next_term(seq)
-        parent = nil
-        term, *seq = seq
-        while @grammar[raw(term)]
-          parent = term
-          term, *rest = @grammar[raw(term)]
-          seq = rest + seq
+      def init_parsing(grammar, tokens)
+        @grammar = grammar.map { |rule| [rule.name, rule] }.to_h
+        @tokens = tokens
+        @token = nil
+        @errors = []
+      end
+
+      def next_token
+        @token, *@tokens = @tokens if @tokens.any?
+        print "\n>>> Next Token: #{@token.inspect}"
+      end
+
+      def error(options = {})
+        @errors << options
+      end
+
+      def invoke(rule)
+        send(rule.method_name)
+      end
+
+      def evaluate(term)
+        if non_terminal? term
+          invoke(rule_of(term))
+        else
+          next_token unless expect?(term)
         end
-        [parent, term, seq]
+      end
+
+      def expect?(term)
+        accepted = accept? term
+        error(missing: term) unless accepted
+        accepted
+      end
+
+      def accept?(term)
+        accepted = (@token == { char: term } or category_of(@token) == term)
+        print "\n>>> Accepted Token: #{@token.inspect} - Matched: #{term.inspect}" if accepted
+        next_token if accepted
+        accepted
+      end
+
+      def category_of(token)
+        token.first[0]
+      end
+
+      def non_terminal?(term)
+        term.is_a? Symbol and rule_of(term)
+      end
+
+      def rule_of(term)
+        @grammar[raw(term)]
       end
 
       def raw(term)
@@ -99,43 +158,8 @@ module MPF
         end
       end
 
-      def skip(parent, seq)
-        skipped = @grammar[raw(parent)].dup
-        skipped.shift until skipped.first == seq.first
-        while skipped.any?
-          skipped.shift
-          seq.shift
-        end
-        seq
-      end
-
-      def match?(term, token)
-        token == { char: term } or category_of(token) == term
-      end
-
       def optional?(term)
         term&.is_a? Symbol and term.to_s.end_with? '?'
-      end
-
-      def first_child?(parent, term)
-        @grammar[raw(parent)]&.first == term
-      end
-
-      def left_term_of(rule)
-        print ">>> extract: #{rule[0][/\A(.*)\?/][1]}"
-        rule[0][/\A(.*)\?/][1]
-      end
-
-      def right_term_of(rule)
-        rule[1]
-      end
-
-      def category_of(token)
-        token.first[0]
-      end
-
-      def text_of(token)
-        token.first[1]
       end
 
     end
