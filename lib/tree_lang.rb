@@ -2,28 +2,6 @@ require 'xml'
 
 module TreeLang
 
-  class InternalSyntax
-
-    def initialize(options = {})
-      @visitor = options[:visitor]
-    end
-
-    def node(name, attributes = {}, &block)
-      @visitor.visit_node(name, attributes, &block)
-      nil
-    end
-
-    def content(value)
-      @visitor.visit_content(value)
-      nil
-    end
-
-    def evaluate(&source_code)
-      instance_eval &source_code
-    end
-
-  end
-
   module Model
 
     class Node
@@ -68,6 +46,91 @@ module TreeLang
 
   end
 
+  module Internal
+
+    class Syntax
+
+      def initialize(options = {})
+        @visitor = options[:visitor]
+      end
+
+      def node(name, attributes = {}, &block)
+        @visitor.visit_node(name, attributes, &block)
+        nil
+      end
+
+      def content(value)
+        @visitor.visit_content(value)
+        nil
+      end
+
+      def evaluate(&source_code)
+        instance_eval &source_code
+      end
+
+    end
+
+    class Emitter
+
+      attr_reader :root
+
+      def initialize(root)
+        @root = root
+      end
+
+      def emit_code
+        emitter = self
+        TreeLang.source do
+          emitter.emit_node(self, emitter.root)
+        end
+      end
+
+      def emit_node(syntax, node)
+        if node.is_a? Model::Node
+          emitter = self
+          syntax.node(node.name, node.attributes) do
+            node.children.each { |child| emitter.emit_node(syntax, child) }
+            nil
+          end
+        else
+          syntax.content(node)
+        end
+      end
+
+    end
+
+    class Source
+
+      def initialize(&source_code)
+        @source_code = source_code
+      end
+
+      def print(options)
+        TreeLang.print(options, &@source_code)
+      end
+
+      def render(options)
+        TreeLang.render(options, &@source_code)
+      end
+
+      def build
+        TreeLang.build(&@source_code)
+      end
+
+    end
+
+  end
+
+  def self.source(&source_code)
+    Internal::Source.new &source_code
+  end
+
+  def self.emit(options = {})
+    model = options[:from]
+    emitter = Internal::Emitter.new(model)
+    emitter.emit_code
+  end
+
   def self.build(&source_code)
     builder = Model::Builder.new
     visit visitor: builder, &source_code
@@ -91,66 +154,7 @@ module TreeLang
   end
 
   def self.visit(options = {}, &source_code)
-    InternalSyntax.new(visitor: options[:visitor]).evaluate &source_code
-  end
-
-  class CodeEmitter
-
-    attr_reader :root
-
-    def initialize(root)
-      @root = root
-    end
-
-    def emit_code
-      emitter = self
-      TreeLang.source do
-        emitter.emit_node(self, emitter.root)
-      end
-    end
-
-    def emit_node(syntax, node)
-      if node.is_a? Model::Node
-        emitter = self
-        syntax.node(node.name, node.attributes) do
-          node.children.each { |child| emitter.emit_node(syntax, child) }
-          nil
-        end
-      else
-        syntax.content(node)
-      end
-    end
-
-  end
-
-  def self.emit(options = {})
-    model = options[:from]
-    emitter = CodeEmitter.new(model)
-    emitter.emit_code
-  end
-
-  class Source
-
-    def initialize(&source_code)
-      @source_code = source_code
-    end
-
-    def print(options)
-      TreeLang.print(options, &@source_code)
-    end
-
-    def render(options)
-      TreeLang.render(options, &@source_code)
-    end
-
-    def build
-      TreeLang.build(&@source_code)
-    end
-
-  end
-
-  def self.source(&source_code)
-    Source.new &source_code
+    Internal::Syntax.new(visitor: options[:visitor]).evaluate &source_code
   end
 
 end
