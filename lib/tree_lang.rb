@@ -5,7 +5,7 @@ require 'text_renderer'
 
 module TreeLang
 
-  class Structure
+  class InternalSyntax
 
     def initialize(options = {})
       @visitor = options[:visitor]
@@ -19,6 +19,10 @@ module TreeLang
     def content(value)
       @visitor.visit_content(value)
       nil
+    end
+
+    def evaluate(&source_code)
+      instance_eval &source_code
     end
 
   end
@@ -129,7 +133,7 @@ module TreeLang
   end
 
   def self.visit(options = {}, &source_code)
-    Structure.new(visitor: options[:visitor]).instance_eval &source_code
+    InternalSyntax.new(visitor: options[:visitor]).evaluate &source_code
   end
 
   class CodeEmitter
@@ -147,15 +151,15 @@ module TreeLang
       end
     end
 
-    def emit_node(lang, node)
+    def emit_node(syntax, node)
       if node.is_a? Node
         emitter = self
-        lang.node(node.name, node.attributes) do
-          node.children.each { |child| emitter.emit_node(lang, child) }
+        syntax.node(node.name, node.attributes) do
+          node.children.each { |child| emitter.emit_node(syntax, child) }
           nil
         end
       else
-        lang.content(node)
+        syntax.content(node)
       end
     end
 

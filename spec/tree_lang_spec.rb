@@ -18,10 +18,6 @@ end
 source_code.print(to: :xml)
 print "\n\n"
 
-target_code = source_code.render(to: :xml)
-print target_code
-print "\n\n"
-
 model = source_code.build
 print model.inspect
 print "\n\n"
@@ -30,7 +26,13 @@ source_code = TreeLang.emit(from: model)
 source_code.print(to: :xml)
 print "\n\n"
 
-# source_code.execute
+target_code = source_code.render(to: :xml)
+print target_code
+print "\n\n"
+
+# source_code = TreeLang.parse(from: :xml, text: target_code)
+# source_code.print(to: :xml)
+# print "\n\n"
 
 RSpec.describe 'tree_lang' do
   # it 'translates the layout elements to a div' do
