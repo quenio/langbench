@@ -7,30 +7,18 @@ module MPF
 
     module External
 
-      class Syntax
+      class Syntax < Language::External::Syntax
 
-        def initialize
-          @skip = /\s*/
+        skip /\s*/
 
-          @tokens = {
-            name: /[A-Za-z0-9]+/,
-            value: /"[A-Za-z0-9]+"/
-          }
+        tokens name: /[A-Za-z0-9]+/,
+               value: /"[A-Za-z0-9]+"/
 
-          @grammar = {
-            start: :element,
-            element: %i[open element close],
-            open: ['<', :name, :attributes, '>'],
-            close: ['</', :name, '>'],
-            attributes: [:name, '=', :value]
-          }
-        end
-
-        def parse(options = {})
-          tokenizer = Text::Tokenizer.new(skip: @skip, rules: @tokens)
-          parser = Language::Parser.new(grammar: @grammar, visitor: options[:visitor])
-          parser.parse(tokenizer.tokenize(options[:text]))
-        end
+        grammar start: :element,
+                element: %i[open element close],
+                open: ['<', :name, :attributes, '>'],
+                close: ['</', :name, '>'],
+                attributes: [:name, '=', :value]
 
       end
 
