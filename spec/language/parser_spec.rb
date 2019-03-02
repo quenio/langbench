@@ -35,7 +35,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ char: start_ch }, { id: id }, { char: end_ch }],
-            expected: [nil, []]
+            expected: []
           }
         end
       end
@@ -44,7 +44,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ id: id }, { char: end_ch }],
-            expected: [nil, [{ missing: start_ch }]]
+            expected: [{ missing: start_ch }]
           }
         end
       end
@@ -53,7 +53,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ char: start_ch }, { id: id }],
-            expected: [nil, [{ missing: end_ch }]]
+            expected: [{ missing: end_ch }]
           }
         end
       end
@@ -62,7 +62,7 @@ module MPF
         check do |start_ch, id, end_ch|
           {
             given: [{ char: start_ch }, { id: id }, { char: end_ch }, { char: end_ch }],
-            expected: [nil, [{ unrecognized: end_ch }]]
+            expected: [{ unrecognized: end_ch }]
           }
         end
       end

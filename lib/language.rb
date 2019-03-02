@@ -44,6 +44,8 @@ module MPF
 
     class Parser
 
+      MAX_ERROR_COUNT = 3
+
       class Rule
 
         attr_reader :name
@@ -84,7 +86,7 @@ module MPF
           next_token
           invoke(grammar.first)
           check_pending_tokens
-          [nil, @errors]
+          @errors
         end
       end
 
@@ -128,6 +130,8 @@ module MPF
       end
 
       def evaluate(term)
+        return if @errors.length >= MAX_ERROR_COUNT
+
         if non_terminal? term
           invoke(rule_of(term))
         else
