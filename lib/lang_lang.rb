@@ -50,56 +50,6 @@ module LangLang
 
   end
 
-  class Tokenizer
-
-    attr_reader :skip
-    attr_reader :rules
-
-    def initialize(options = {})
-      @skip = options[:skip]
-      @rules = options[:rules]
-    end
-
-    def tokenize(source)
-      source = source.dup
-      tokens = []
-      skip!(source)
-      until source.empty?
-        token = next!(source)
-        tokens.push(token) if token
-        skip!(source) if source
-      end
-      tokens
-    end
-
-    def skip!(source)
-      substr = source[@skip]
-      substr ? (source.sub! substr, '') : source
-    end
-
-    def next!(source)
-      token = next_token(source)
-      if not token or not source.start_with? token.values[0]
-        token = { char: source[0] } unless source.empty?
-      end
-      source.sub! token.values[0], '' if token
-      token
-    end
-
-    def next_token(source)
-      rules = @rules.dup
-      rule = rules.shift
-      token = nil
-      while rule and (not token or not source.start_with? token)
-        token = source[rule[1]]
-        id = rule[0]
-        rule = rules.shift
-      end
-      { id => token } if token
-    end
-
-  end
-
   class Parser
 
     attr_reader :grammar
