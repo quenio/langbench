@@ -2,7 +2,7 @@ module TextRenderer
 
   attr_reader :text
 
-  def init_rendering
+  def init_text_rendering
     @text = ''
   end
 
