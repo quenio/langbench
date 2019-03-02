@@ -86,48 +86,52 @@ module TreeLang
     renderer.text
   end
 
-  class Node
+  module Model
 
-    attr_reader :name
-    attr_reader :attributes
-    attr_reader :children
+    class Node
 
-    def initialize(name, attributes)
-      @name = name
-      @attributes = attributes
-      @children = []
+      attr_reader :name
+      attr_reader :attributes
+      attr_reader :children
+
+      def initialize(name, attributes)
+        @name = name
+        @attributes = attributes
+        @children = []
+      end
+
     end
 
-  end
+    class Builder
 
-  class ModelBuilder
+      include Visitor
 
-    include Visitor
+      attr_reader :root
 
-    attr_reader :root
+      def initialize
+        @parent = []
+      end
 
-    def initialize
-      @parent = []
-    end
+      def enter_node(name, attributes, &block)
+        node = Node.new(name, attributes)
+        @parent.last.children << node unless @parent.empty?
+        @parent.push node
+      end
 
-    def enter_node(name, attributes, &block)
-      node = Node.new(name, attributes)
-      @parent.last.children << node unless @parent.empty?
-      @parent.push node
-    end
+      def exit_node(name, _attributes, &block)
+        @root = @parent.pop
+      end
 
-    def exit_node(name, _attributes, &block)
-      @root = @parent.pop
-    end
+      def visit_content(value)
+        @parent.last.children << value
+      end
 
-    def visit_content(value)
-      @parent.last.children << value
     end
 
   end
 
   def self.build(&source_code)
-    builder = ModelBuilder.new
+    builder = Model::Builder.new
     visit visitor: builder, &source_code
     builder.root
   end
@@ -152,7 +156,7 @@ module TreeLang
     end
 
     def emit_node(syntax, node)
-      if node.is_a? Node
+      if node.is_a? Model::Node
         emitter = self
         syntax.node(node.name, node.attributes) do
           node.children.each { |child| emitter.emit_node(syntax, child) }
