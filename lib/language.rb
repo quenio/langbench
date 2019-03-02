@@ -106,8 +106,12 @@ module MPF
       end
 
       def next_token
-        @token, *@tokens = @tokens if @tokens.any?
-        print "\n>>> Next Token: #{@token.inspect}"
+        if @tokens.any?
+          @token, *@tokens = @tokens
+        else
+          @token = nil
+        end
+        print "\n>>> Next Token: #{@token&.inspect}"
       end
 
       def error(options = {})
@@ -120,7 +124,7 @@ module MPF
       end
 
       def check_pending_tokens
-        error(unrecognized: text_of(@token)) if @token
+        error(unrecognized: text_of(@token)) if @token and @errors.empty?
       end
 
       def evaluate(term)
@@ -138,8 +142,8 @@ module MPF
       end
 
       def accept?(term)
-        accepted = (@token == { char: term } or category_of(@token) == term)
-        print "\n>>> Accepted Token: #{@token.inspect} - Matched: #{term.inspect}" if accepted
+        accepted = (@token and (@token == { char: term } or category_of(@token) == term))
+        print "\n>>> Accepted Token: #{@token&.inspect} - Matched: #{term.inspect}" if accepted
         next_token if accepted
         accepted
       end
