@@ -54,8 +54,8 @@ module Text
 
   class Tokenizer
 
-    attr_reader :skip
-    attr_reader :rules
+    attr_accessor :skip
+    attr_accessor :rules
 
     def initialize(options = {})
       @skip = options[:skip]

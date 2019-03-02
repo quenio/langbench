@@ -1,6 +1,6 @@
 class Parser
 
-  attr_reader :grammar
+  attr_accessor :grammar
 
   def initialize(options = {})
     @grammar = options[:grammar]

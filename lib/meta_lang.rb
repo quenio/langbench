@@ -4,16 +4,21 @@ module MetaLang
 
     module Syntax
 
+      def initialize(options = {})
+        @tokenizer = options[:tokenizer]
+        @parser = options[:parser]
+      end
+
       def skip(regex)
-        @tokenizer_options = (@tokenizer_options ||= {}).merge(skip: regex)
+        @tokenizer.skip = regex
       end
 
       def tokens(rules = {})
-        @tokenizer_options = (@tokenizer_options ||= {}).merge(rules: rules)
+        @tokenizer.rules = rules
       end
 
       def grammar(rules = {})
-        @parser_options = { grammar: rules }
+        @parser.grammar = rules
       end
 
       def evaluate(&source_code)
