@@ -16,7 +16,7 @@ module MPF
 
         grammar start: :element,
                 element: %i[open element close],
-                open: ['<', :name, :attributes, '>'],
+                open: ['<', :name, :attributes?, '>'],
                 close: ['</', :name, '>'],
                 attributes: [:name, '=', :value]
 
