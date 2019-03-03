@@ -6,9 +6,10 @@ module MPF
 
     def check
       rules = {
-        element: %i[stag etag],
+        element: %i[stag content? etag],
         stag: ['<', :name, '>'],
-        etag: ['</', :name, '>']
+        etag: ['</', :name, '>'],
+        content: [:name]
       }
       @parser = Language::Parser.new(grammar: rules)
       options = yield
@@ -18,7 +19,20 @@ module MPF
 
     describe '#parse' do
 
-      it 'recognizes a valid sentence' do
+      it 'recognizes a valid sentence with optional' do
+        check do
+          {
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { name: 'text' },
+              { char: '</' }, { name: 'html' }, { char: '>' }
+            ],
+            expected: []
+          }
+        end
+      end
+
+      it 'recognizes a valid sentence without optional' do
         check do
           {
             given: [
