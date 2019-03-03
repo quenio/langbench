@@ -31,7 +31,7 @@ module MPF
             skip: self.class.skip_regex,
             rules: self.class.token_rules
           )
-          parser = Language::Parser.generate(
+          parser = Language::Parser.new(
             grammar: self.class.grammar_rules,
             visitor: options[:visitor]
           )
@@ -70,48 +70,28 @@ module MPF
 
       end
 
-      def self.generate(options = {})
+      def initialize(options = {})
         grammar = Grammar.of(options[:grammar])
-        Class.new(Parser) { define_parser(self, grammar) }.new
+        @start_rule = grammar.first
+        @grammar = grammar.map { |rule| [rule.name, rule] }.to_h
+        @tokens = []
       end
 
-      def self.define_parser(parser, grammar)
-        grammar.each { |rule| define_rule(parser, rule) }
-        define_parse(parser, grammar)
-      end
+      def parse(tokens)
+        raise 'Parser already running.' if @token or @tokens.any?
 
-      def self.define_parse(parser, grammar)
-        parser.define_method(:parse) do |tokens|
-          init_parsing(grammar, tokens)
-          next_token
-          invoke(grammar.first)
-          check_pending_tokens
-          @errors
-        end
-      end
+        @tokens = tokens.dup
+        @token = nil
+        @errors = []
 
-      def self.define_rule(parser, rule)
-        parser.define_method(rule.method_name) do |optional|
-          print "\n>>> Enter: #{rule.name} - optional: #{optional}"
-          first, *rest = rule.terms
-          continue = evaluate(first, optional) if first
-          while continue and rest.any?
-            term, *rest = rest
-            continue = evaluate(term, false)
-          end
-          print "\n>>> Exit: #{rule.name}"
-          continue or optional
-        end
+        next_token
+        execute_rule @start_rule
+        check_pending_tokens
+
+        @errors
       end
 
       private
-
-      def init_parsing(grammar, tokens)
-        @grammar = grammar.map { |rule| [rule.name, rule] }.to_h
-        @tokens = tokens
-        @token = nil
-        @errors = []
-      end
 
       def next_token
         if @tokens.any?
@@ -119,29 +99,36 @@ module MPF
         else
           @token = nil
         end
-        print "\n>>> Next Token: #{@token&.inspect}"
+        log "\n>>> Next Token: #{@token&.inspect}"
       end
 
       def error(options = {})
         @errors << options
-        print "\n>>> Error: #{options.inspect}"
-      end
-
-      def invoke(rule, optional = false)
-        send rule.method_name, optional
+        log "\n>>> Error: #{options.inspect}"
       end
 
       def check_pending_tokens
         error(unrecognized: text_of(@token)) if @token and @errors.empty?
       end
 
-      def evaluate(term, optional)
+      def execute_rule(rule, optional = false)
+        log "\n>>> Enter: #{rule.name} - optional: #{optional}"
+        first, *rest = rule.terms
+        continue = verify_term(first, optional) if first
+        while continue and rest.any?
+          term, *rest = rest
+          continue = verify_term(term)
+        end
+        log "\n>>> Exit: #{rule.name}"
+        continue or optional
+      end
+
+      def verify_term(term, optional = false)
         return if @errors.length >= MAX_ERROR_COUNT
 
-        print "\n>>> evaluate: #{term.inspect} - optional: #{optional.inspect}"
-
+        log "\n>>> evaluate: #{term.inspect} - optional: #{optional.inspect}"
         if non_terminal? term
-          invoke rule_of(term), optional || optional?(term)
+          execute_rule rule_of(term), optional || optional?(term)
         elsif optional
           accept?(term)
         else
@@ -157,7 +144,7 @@ module MPF
 
       def accept?(term)
         accepted = (@token and (@token == { char: term } or category_of(@token) == raw(term)))
-        print "\n>>> Accepted Token: #{@token&.inspect} - Matched: #{term.inspect}" if accepted
+        log "\n>>> Accepted Token: #{@token&.inspect} - Matched: #{term.inspect}" if accepted
         next_token if accepted
         accepted
       end
@@ -188,6 +175,10 @@ module MPF
 
       def optional?(term)
         term&.is_a? Symbol and term.to_s.end_with? '?'
+      end
+
+      def log(_message)
+        # print message
       end
 
     end

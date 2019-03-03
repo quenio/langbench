@@ -22,7 +22,7 @@ module MPF
           part1: [start_char, :id],
           part2: [end_char]
         }
-        @parser = Language::Parser.generate(grammar: rules)
+        @parser = Language::Parser.new(grammar: rules)
         options = yield start_char, id, end_char
         errors = @parser.parse(options[:given])
         expect(errors).to eq(options[:expected])
