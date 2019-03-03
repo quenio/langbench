@@ -91,10 +91,16 @@ module MPF
       end
 
       def self.define_rule(parser, rule)
-        parser.define_method(rule.method_name) do
-          print "\n>>> Enter: #{rule.name}"
-          rule.terms.each { |term| evaluate(term) }
+        parser.define_method(rule.method_name) do |optional|
+          print "\n>>> Enter: #{rule.name} - optional: #{optional}"
+          first, *rest = rule.terms
+          continue = evaluate(first, optional) if first
+          while continue and rest.any?
+            term, *rest = rest
+            continue = evaluate(term, false)
+          end
           print "\n>>> Exit: #{rule.name}"
+          continue or optional
         end
       end
 
@@ -121,21 +127,25 @@ module MPF
         print "\n>>> Error: #{options.inspect}"
       end
 
-      def invoke(rule)
-        send(rule.method_name)
+      def invoke(rule, optional = false)
+        send rule.method_name, optional
       end
 
       def check_pending_tokens
         error(unrecognized: text_of(@token)) if @token and @errors.empty?
       end
 
-      def evaluate(term)
+      def evaluate(term, optional)
         return if @errors.length >= MAX_ERROR_COUNT
 
+        print "\n>>> evaluate: #{term.inspect} - optional: #{optional.inspect}"
+
         if non_terminal? term
-          invoke(rule_of(term))
+          invoke rule_of(term), optional || optional?(term)
+        elsif optional
+          accept?(term)
         else
-          expect?(term)
+          expect? term
         end
       end
 
@@ -146,7 +156,7 @@ module MPF
       end
 
       def accept?(term)
-        accepted = (@token and (@token == { char: term } or category_of(@token) == term))
+        accepted = (@token and (@token == { char: term } or category_of(@token) == raw(term)))
         print "\n>>> Accepted Token: #{@token&.inspect} - Matched: #{term.inspect}" if accepted
         next_token if accepted
         accepted
@@ -165,7 +175,19 @@ module MPF
       end
 
       def rule_of(term)
-        @grammar[term]
+        @grammar[raw(term)]
+      end
+
+      def raw(term)
+        if term.is_a? Symbol
+          term[/\A(\w+)/].to_sym
+        else
+          term
+        end
+      end
+
+      def optional?(term)
+        term&.is_a? Symbol and term.to_s.end_with? '?'
       end
 
     end

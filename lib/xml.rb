@@ -15,9 +15,7 @@ module MPF
                value: /"[A-Za-z0-9\s]+"/
 
         grammar start: [:element],
-                element: [:open, :element, :close],
-                open: ['<', :name, :attributes, '>'],
-                close: ['</', :name, '>'],
+                element: ['<', :name, :attributes?, '>', :element?, :name?, :element?, '</', :name, '>'],
                 attributes: [:name, '=', :value]
 
       end
