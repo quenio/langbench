@@ -6,9 +6,9 @@ module MPF
 
     def check
       rules = {
-        element: %i[part1 part2],
-        part1: ['<', :name],
-        part2: ['>']
+        element: %i[stag etag],
+        stag: ['<', :name, '>'],
+        etag: ['</', :name, '>']
       }
       @parser = Language::Parser.new(grammar: rules)
       options = yield
@@ -21,7 +21,10 @@ module MPF
       it 'recognizes a valid sentence' do
         check do
           {
-            given: [{ char: '<' }, { name: 'html' }, { char: '>' }],
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { char: '</' }, { name: 'html' }, { char: '>' }
+            ],
             expected: []
           }
         end
@@ -30,7 +33,10 @@ module MPF
       it 'does not recognize a sentence missing initial character' do
         check do
           {
-            given: [{ name: 'html' }, { char: '>' }],
+            given: [
+              { name: 'html' }, { char: '>' },
+              { char: '</' }, { name: 'html' }, { char: '>' }
+            ],
             expected: [{ missing: '<' }]
           }
         end
@@ -39,7 +45,10 @@ module MPF
       it 'does not recognize a sentence missing final character' do
         check do
           {
-            given: [{ char: '<' }, { name: 'html' }],
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { char: '</' }, { name: 'html' }
+            ],
             expected: [{ missing: '>' }]
           }
         end
@@ -48,7 +57,10 @@ module MPF
       it 'does not recognize a sentence with an extra character' do
         check do
           {
-            given: [{ char: '<' }, { name: 'html' }, { char: '>' }, { char: '>' }],
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { char: '</' }, { name: 'html' }, { char: '>' }, { char: '>' }
+            ],
             expected: [{ unrecognized: '>' }]
           }
         end
