@@ -9,7 +9,7 @@ module MPF
         element: %i[stag content? etag],
         stag: ['<', :name, '>'],
         etag: ['</', :name, '>'],
-        content: [{ any: %i[name number] }]
+        content: [{ any: %i[name number element] }]
       }
       @parser = Language::Parser.new(grammar: rules)
       options = yield
@@ -50,6 +50,20 @@ module MPF
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
               { number: 123 },
+              { char: '</' }, { name: 'html' }, { char: '>' }
+            ],
+            expected: []
+          }
+        end
+      end
+
+      it 'recognizes a valid sentence with alternative non-terminal' do
+        check do
+          {
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { char: '<' }, { name: 'body' }, { char: '>' },
+              { char: '</' }, { name: 'body' }, { char: '>' },
               { char: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: []
