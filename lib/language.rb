@@ -99,7 +99,7 @@ module MPF
         else
           @token = nil
         end
-        log "\n>>> Next Token: #{@token&.inspect}"
+        log "\n>>> Next Token: #{@token.inspect}"
       end
 
       def error(options = {})
@@ -112,41 +112,33 @@ module MPF
       end
 
       def execute_rule(rule, optional = false)
-        log "\n>>> Enter: #{rule.name} - optional: #{optional}"
+        log "\n>>> execute_rule(#{rule.name}, optional: #{optional})"
         first, *rest = rule.terms
-        continue = verify_term(first, optional) if first
-        while continue and rest.any?
+        verify_term(first, rest, optional) if first
+        while rest.any? and @errors.length < MAX_ERROR_COUNT
           term, *rest = rest
-          continue = verify_term(term)
+          verify_term(term)
         end
         log "\n>>> Exit: #{rule.name}"
-        continue or optional
       end
 
-      def verify_term(term, optional = false)
-        return if @errors.length >= MAX_ERROR_COUNT
-
-        log "\n>>> evaluate: #{term.inspect} - optional: #{optional.inspect}"
+      def verify_term(term, rest = {}, optional = false)
+        log "\n>>> verify_term(#{term.inspect}, optional: #{optional.inspect})"
         if non_terminal? term
           execute_rule rule_of(term), optional || optional?(term)
+        elsif match? term
+          log "\n>>> Token Match: #{@token&.inspect} - term: #{term}"
+          next_token
         elsif optional
-          accept?(term)
+          rest.clear
         else
-          expect? term
+          log "\n>>> Error: #{@token&.inspect} - term: #{term}" unless optional
+          error(missing: term)
         end
       end
 
-      def expect?(term)
-        accepted = accept? term
-        error(missing: term) unless accepted
-        accepted
-      end
-
-      def accept?(term)
-        accepted = (@token and (@token == { char: term } or category_of(@token) == raw(term)))
-        log "\n>>> Accepted Token: #{@token&.inspect} - Matched: #{term.inspect}" if accepted
-        next_token if accepted
-        accepted
+      def match?(term)
+        @token and (@token == { char: term } or category_of(@token) == raw(term))
       end
 
       def category_of(token)
@@ -178,7 +170,7 @@ module MPF
       end
 
       def log(_message)
-        # print message
+        # print _message
       end
 
     end

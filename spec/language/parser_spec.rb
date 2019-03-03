@@ -4,65 +4,52 @@ module MPF
 
   RSpec.describe Language::Parser do
 
-    before do
-      @grammars = property_of do
-        [
-          sized(5) { string(:alpha) }.to_sym,
-          sized(1) { string(:punct) },
-          sized(5) { string(:alnum) },
-          sized(1) { string(:punct) }
-        ]
-      end
-    end
-
     def check
-      @grammars.check do |element, start_char, id, end_char|
-        rules = {
-          element => %i[part1 part2],
-          part1: [start_char, :id],
-          part2: [end_char]
-        }
-        @parser = Language::Parser.new(grammar: rules)
-        options = yield start_char, id, end_char
-        errors = @parser.parse(options[:given])
-        expect(errors).to eq(options[:expected])
-      end
+      rules = {
+        element: %i[part1 part2],
+        part1: ['<', :name],
+        part2: ['>']
+      }
+      @parser = Language::Parser.new(grammar: rules)
+      options = yield
+      errors = @parser.parse(options[:given])
+      expect(errors).to eq(options[:expected])
     end
 
     describe '#parse' do
 
       it 'recognizes a valid sentence' do
-        check do |start_ch, id, end_ch|
+        check do
           {
-            given: [{ char: start_ch }, { id: id }, { char: end_ch }],
+            given: [{ char: '<' }, { name: 'html' }, { char: '>' }],
             expected: []
           }
         end
       end
 
       it 'does not recognize a sentence missing initial character' do
-        check do |start_ch, id, end_ch|
+        check do
           {
-            given: [{ id: id }, { char: end_ch }],
-            expected: [{ missing: start_ch }]
+            given: [{ name: 'html' }, { char: '>' }],
+            expected: [{ missing: '<' }]
           }
         end
       end
 
       it 'does not recognize a sentence missing final character' do
-        check do |start_ch, id, end_ch|
+        check do
           {
-            given: [{ char: start_ch }, { id: id }],
-            expected: [{ missing: end_ch }]
+            given: [{ char: '<' }, { name: 'html' }],
+            expected: [{ missing: '>' }]
           }
         end
       end
 
       it 'does not recognize a sentence with an extra character' do
-        check do |start_ch, id, end_ch|
+        check do
           {
-            given: [{ char: start_ch }, { id: id }, { char: end_ch }, { char: end_ch }],
-            expected: [{ unrecognized: end_ch }]
+            given: [{ char: '<' }, { name: 'html' }, { char: '>' }, { char: '>' }],
+            expected: [{ unrecognized: '>' }]
           }
         end
       end
