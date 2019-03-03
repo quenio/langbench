@@ -124,7 +124,14 @@ module MPF
 
       def verify_term(term, rest = {}, optional = false)
         log "\n>>> verify_term(#{term.inspect}, optional: #{optional.inspect})"
-        if non_terminal? term
+        if alternative? term
+          alternatives_of(term).each do |subterm|
+            if match? subterm
+              verify_term(subterm, rest, optional)
+              break
+            end
+          end
+        elsif non_terminal? term
           execute_rule rule_of(term), optional || optional?(term)
         elsif match? term
           log "\n>>> Token Match: #{@token&.inspect} - term: #{term}"
@@ -137,8 +144,20 @@ module MPF
         end
       end
 
+      def alternative?(term)
+        term.is_a? Hash and alternatives_of(term)
+      end
+
+      def non_terminal?(term)
+        term.is_a? Symbol and rule_of(term)
+      end
+
       def match?(term)
         @token and (@token == { char: term } or category_of(@token) == raw(term))
+      end
+
+      def alternatives_of(term)
+        term[:any]
       end
 
       def category_of(token)
@@ -147,10 +166,6 @@ module MPF
 
       def text_of(token)
         token.first[1]
-      end
-
-      def non_terminal?(term)
-        term.is_a? Symbol and rule_of(term)
       end
 
       def rule_of(term)

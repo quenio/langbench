@@ -9,7 +9,7 @@ module MPF
         element: %i[stag content? etag],
         stag: ['<', :name, '>'],
         etag: ['</', :name, '>'],
-        content: [:name]
+        content: [{ any: %i[name number] }]
       }
       @parser = Language::Parser.new(grammar: rules)
       options = yield
@@ -18,6 +18,18 @@ module MPF
     end
 
     describe '#parse' do
+
+      it 'recognizes a valid sentence without optional' do
+        check do
+          {
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { char: '</' }, { name: 'html' }, { char: '>' }
+            ],
+            expected: []
+          }
+        end
+      end
 
       it 'recognizes a valid sentence with optional' do
         check do
@@ -32,11 +44,12 @@ module MPF
         end
       end
 
-      it 'recognizes a valid sentence without optional' do
+      it 'recognizes a valid sentence with alternative number' do
         check do
           {
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
+              { number: 123 },
               { char: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: []
