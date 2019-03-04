@@ -4,6 +4,9 @@ module MPF
 
   source_code = TreeLang.source do
     node(:html, lang: 'en') do
+      node(:head) do
+        node(:title) { 'Books' }
+      end
     end
   end
 

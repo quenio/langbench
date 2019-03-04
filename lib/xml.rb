@@ -24,9 +24,11 @@ module MPF
       end
 
       after :attribute do |attributes|
-        name = attributes[:name]
-        value = attributes[:value][1..-2]
-        @attributes = @attributes.merge(name => value)
+        if attributes.any?
+          name = attributes[:name]
+          value = attributes[:value][1..-2]
+          @attributes = @attributes.merge(name => value)
+        end
       end
 
       after :stag do |attributes, visitor|
@@ -35,6 +37,10 @@ module MPF
 
       after :etag do |attributes, visitor|
         visitor.exit_node(attributes[:name])
+      end
+
+      after :content do |attributes, visitor|
+        visitor.visit_content(attributes[:name]) if attributes.any? and attributes[:name]
       end
 
     end
