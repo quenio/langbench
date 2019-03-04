@@ -74,6 +74,7 @@ module MPF
         grammar = Grammar.of(options[:grammar])
         @start_rule = grammar.first
         @grammar = grammar.map { |rule| [rule.name, rule] }.to_h
+        @visitor = options[:visitor]
         @tokens = []
       end
 
@@ -113,16 +114,19 @@ module MPF
 
       def execute_rule(rule, optional = false)
         log "\n>>> execute_rule(#{rule.name}, optional: #{optional})"
+        attributes = {}
+        @visitor&.enter_node(rule.name)
         first, *rest = rule.terms
-        verify_term(first, rest, optional) if first
+        verify_term(attributes, first, rest, optional) if first
         while rest.any? and @errors.length < MAX_ERROR_COUNT
           term, *rest = rest
-          verify_term(term)
+          verify_term(attributes, term)
         end
+        @visitor&.exit_node(rule.name, attributes)
         log "\n>>> Exit: #{rule.name}"
       end
 
-      def verify_term(term, rest = {}, optional = false)
+      def verify_term(attributes, term, rest = {}, optional = false)
         if alternative? term
           subterm = alternatives_of(term).detect do |subterm|
             match? first_of(subterm)
@@ -134,6 +138,7 @@ module MPF
           execute_rule rule_of(term), optional || optional?(term)
         elsif match? term
           log "\n>>> Token Match: #{@token&.inspect} - term: #{term}"
+          attributes[category_of(@token)] = text_of(@token) if category_of(@token) != :char
           next_token
         elsif optional
           rest.clear
