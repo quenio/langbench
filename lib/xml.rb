@@ -1,28 +1,23 @@
 require 'language'
-require 'text'
 
 module MPF
 
   module XML
 
-    module External
+    class Syntax < Language::External::Syntax
 
-      class Syntax < Language::External::Syntax
+      skip /\s*/
 
-        skip /\s*/
+      tokens etag_open: '</',
+             name: /[A-Za-z0-9]+/,
+             value: /"[A-Za-z0-9\s]+"/
 
-        tokens etag_open: '</',
-               name: /[A-Za-z0-9]+/,
-               value: /"[A-Za-z0-9\s]+"/
-
-        grammar start: %i[element],
-                element: %i[stag content? etag],
-                stag: ['<', :name, :attribute?, '>'],
-                etag: [:etag_open, :name, '>'],
-                attribute: [:name, '=', :value],
-                content: [{ any: %i[name element] }]
-
-      end
+      grammar start: %i[element],
+              element: %i[stag content? etag],
+              stag: ['<', :name, :attribute?, '>'],
+              etag: [:etag_open, :name, '>'],
+              attribute: [:name, '=', :value],
+              content: [{ any: %i[name element] }]
 
     end
 

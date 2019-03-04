@@ -131,7 +131,7 @@ module MPF
       builder.root
     end
 
-    @syntax = { xml: XML::External::Syntax }
+    @syntax = { xml: XML::Syntax }
 
     def self.parse(options = {})
       # builder = Builder.new
