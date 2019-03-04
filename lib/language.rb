@@ -28,6 +28,8 @@ module MPF
           attr_accessor :skip_regex
           attr_accessor :token_rules
           attr_accessor :grammar_rules
+          attr_accessor :pre_actions
+          attr_accessor :post_actions
         end
 
         def self.skip(regex)
@@ -42,6 +44,14 @@ module MPF
           @grammar_rules = rules
         end
 
+        def self.before(rule_name, &block)
+          (@pre_actions ||= {})[rule_name] = block
+        end
+
+        def self.after(rule_name, &block)
+          (@post_actions ||= {})[rule_name] = block
+        end
+
         def parse(options = {})
           tokenizer = Text::Tokenizer.new(
             skip: self.class.skip_regex,
@@ -49,7 +59,10 @@ module MPF
           )
           parser = Language::External::Parser.new(
             grammar: self.class.grammar_rules,
-            visitor: options[:visitor]
+            visitor: options[:visitor],
+            pre_actions: self.class.pre_actions,
+            post_actions: self.class.post_actions,
+            ignore_actions: options[:ignore_actions]
           )
           parser.parse(tokenizer.tokenize(options[:text]))
         end
@@ -89,6 +102,10 @@ module MPF
           @start_rule = grammar.first
           @grammar = grammar.map { |rule| [rule.name, rule] }.to_h
           @visitor = options[:visitor]
+          @pre_actions = options[:pre_actions] || {}
+          @post_actions = options[:post_actions] || {}
+          @ignore_actions = options[:ignore_actions] || false
+          @action_context = Object.new unless @ignore_actions
           @tokens = []
         end
 
@@ -129,15 +146,33 @@ module MPF
         def execute_rule(rule, optional = false)
           log "\n>>> execute_rule(#{rule.name}, optional: #{optional})"
           attributes = {}
-          @visitor&.enter_node(rule.name)
+          enter_node(rule)
           first, *rest = rule.terms
           verify_term(attributes, first, rest, optional) if first
           while rest.any? and @errors.length < MAX_ERROR_COUNT
             term, *rest = rest
             verify_term(attributes, term)
           end
-          @visitor&.exit_node(rule.name, attributes)
+          exit_node(rule, attributes)
           log "\n>>> Exit: #{rule.name}"
+        end
+
+        def enter_node(rule)
+          if @ignore_actions
+            @visitor&.enter_node(rule.name)
+          else
+            action = @pre_actions[rule.name]
+            @action_context.instance_exec(@visitor, &action) if action
+          end
+        end
+
+        def exit_node(rule, attributes)
+          if @ignore_actions
+            @visitor&.exit_node(rule.name, attributes)
+          else
+            action = @post_actions[rule.name]
+            @action_context.instance_exec(attributes, @visitor, &action) if action
+          end
         end
 
         def verify_term(attributes, term, rest = {}, optional = false)

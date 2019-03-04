@@ -19,6 +19,24 @@ module MPF
               attribute: [:name, '=', :value],
               content: [{ any: %i[name element] }]
 
+      before :stag do
+        @attributes = {}
+      end
+
+      after :attribute do |attributes|
+        name = attributes[:name]
+        value = attributes[:value][1..-2]
+        @attributes = @attributes.merge(name => value)
+      end
+
+      after :stag do |attributes, visitor|
+        visitor.enter_node(attributes[:name], @attributes)
+      end
+
+      after :etag do |attributes, visitor|
+        visitor.exit_node(attributes[:name])
+      end
+
     end
 
     module Template

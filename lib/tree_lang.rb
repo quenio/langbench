@@ -131,12 +131,14 @@ module MPF
     @syntax = { xml: XML::Syntax }
 
     def self.parse(options = {})
-      # builder = Builder.new
+      builder = Builder.new
+      # printer = Language::External::ParseTree::Printer.new
       language = options[:from]
       syntax = @syntax[language].new
-      errors = syntax.parse(text: options[:text], visitor: Language::External::ParseTree::Printer.new)
-      # [builder.root, errors]
-      [nil, errors]
+      # errors = syntax.parse(text: options[:text], visitor: printer, ignore_actions: true)
+      errors = syntax.parse(text: options[:text], visitor: builder)
+      [builder.root, errors]
+      # [nil, errors]
     end
 
     @printer = { xml: XML::Printer }
