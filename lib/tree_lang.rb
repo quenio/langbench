@@ -132,7 +132,7 @@ module MPF
 
     def self.parse(options = {})
       builder = Builder.new
-      # printer = Language::External::ParseTree::Printer.new
+      printer = Language::External::ParseTree::Printer.new
       language = options[:from]
       syntax = @syntax[language].new
       # errors = syntax.parse(text: options[:text], visitor: printer, ignore_actions: true)

@@ -110,6 +110,8 @@ module MPF
         end
 
         def parse(tokens)
+          # tokens.each { |t| print "\n#{t}" }
+
           raise 'Parser already running.' if @token or @tokens.any?
 
           @tokens = tokens.dup

@@ -10,11 +10,11 @@ module MPF
 
       tokens etag_open: '</',
              name: /[A-Za-z0-9]+/,
-             value: /"[[:print:]]+"/
+             value: /"[^"<&]*"/
 
       grammar start: %i[element],
               element: %i[stag content* etag],
-              stag: ['<', :name, :attribute?, '>'],
+              stag: ['<', :name, 'attribute*'.to_sym, '>'],
               etag: [:etag_open, :name, '>'],
               attribute: [:name, '=', :value],
               content: [{ any: %i[name element] }]
