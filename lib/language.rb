@@ -143,20 +143,6 @@ module MPF
           error(unrecognized: text_of(@token)) if @token and @errors.empty?
         end
 
-        def execute_rule(rule, optional = false)
-          log "\n>>> execute_rule(#{rule.name}, optional: #{optional})"
-          attributes = {}
-          enter_node(rule)
-          first, *rest = rule.terms
-          verify_term(attributes, first, rest, optional) if first
-          while rest.any? and @errors.length < MAX_ERROR_COUNT
-            term, *rest = rest
-            verify_term(attributes, term)
-          end
-          exit_node(rule, attributes)
-          log "\n>>> Exit: #{rule.name}"
-        end
-
         def enter_node(rule)
           if @ignore_actions
             @visitor&.enter_node(rule.name)
@@ -175,16 +161,35 @@ module MPF
           end
         end
 
+        def execute_rule(rule, optional = false)
+          log "\n>>> execute_rule(#{rule.name}, optional: #{optional})"
+          attributes = {}
+          enter_node(rule)
+          first, *rest = rule.terms
+          verify_term(attributes, first, rest, optional) if first
+          while rest.any? and @errors.length < MAX_ERROR_COUNT
+            term, *rest = rest
+            verify_term(attributes, term)
+          end
+          exit_node(rule, attributes)
+          log "\n>>> Exit: #{rule.name}"
+        end
+
         def verify_term(attributes, term, rest = {}, optional = false)
           if alternative? term
             subterm = alternatives_of(term).detect do |subterm|
-              match? first_of(subterm)
+              match? firsts_of(subterm)
             end
             term = subterm if subterm
           end
           log "\n>>> verify_term(#{term.inspect}, optional: #{optional.inspect})"
           if non_terminal? term
-            execute_rule rule_of(term), optional || optional?(term)
+            loop do
+              execute_rule rule_of(term), optional || optional?(term)
+              break unless multiple?(term) and match? firsts_of(term)
+
+              log ">>> Multiples of term: #{term}"
+            end
           elsif match? term
             log "\n>>> Token Match: #{@token&.inspect} - term: #{term}"
             attributes[category_of(@token)] = text_of(@token) if category_of(@token) != :char
@@ -209,13 +214,19 @@ module MPF
           term.is_a? Symbol and rule_of(term)
         end
 
-        def match?(term)
-          @token and (@token == { char: term } or category_of(@token) == raw(term))
+        def match?(*terms)
+          terms.flat_map { |t| t }.any? do |term|
+            @token and (@token == { char: term } or category_of(@token) == raw(term))
+          end
         end
 
-        def first_of(term)
+        def firsts_of(term)
           term, *_rest = rule_of(term).terms while non_terminal? term
-          term
+          if alternative?(term)
+            alternatives_of(term).flat_map { |subterm| firsts_of(subterm) }
+          else
+            term
+          end
         end
 
         def alternatives_of(term)
@@ -243,7 +254,11 @@ module MPF
         end
 
         def optional?(term)
-          term&.is_a? Symbol and term.to_s.end_with? '?'
+          term&.is_a? Symbol and term.to_s.end_with? '?', '*'
+        end
+
+        def multiple?(term)
+          term&.is_a? Symbol and term.to_s.end_with? '+', '*'
         end
 
         def log(_message)

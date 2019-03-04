@@ -9,7 +9,7 @@ module MPF
         element: %i[stag content? etag],
         stag: ['<', :name, '>'],
         etag: ['</', :name, '>'],
-        content: [{ any: %i[name number element] }]
+        content: [{ any: %i[name number element*] }]
       }
       @parser = Language::External::Parser.new(grammar: rules)
       options = yield
@@ -63,6 +63,24 @@ module MPF
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
               { char: '<' }, { name: 'body' }, { char: '>' },
+              { char: '</' }, { name: 'body' }, { char: '>' },
+              { char: '</' }, { name: 'html' }, { char: '>' }
+            ],
+            expected: []
+          }
+        end
+      end
+
+      it 'recognizes a valid sentence with multiple terms' do
+        check do
+          {
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { char: '<' }, { name: 'body' }, { char: '>' },
+              { char: '<' }, { name: 'header' }, { char: '>' },
+              { char: '</' }, { name: 'header' }, { char: '>' },
+              { char: '<' }, { name: 'footer' }, { char: '>' },
+              { char: '</' }, { name: 'footer' }, { char: '>' },
               { char: '</' }, { name: 'body' }, { char: '>' },
               { char: '</' }, { name: 'html' }, { char: '>' }
             ],
