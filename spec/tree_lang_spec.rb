@@ -4,20 +4,6 @@ module MPF
 
   source_code = TreeLang.source do
     node(:html, lang: 'en') do
-      node(:head) do
-        node(:title) { 'Books' }
-      end
-      node(:body) do
-        node(:div, class: 'header') do
-          node(:img, src: 'logo.png', alt: 'Books Logo')
-        end
-        node(:div, class: 'main') do
-          node(:span, class: 'largeHeading') do
-            content 'Favorite'
-            node(:b) { 'Books' }
-          end
-        end
-      end
     end
   end
 

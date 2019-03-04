@@ -4,6 +4,33 @@ module MPF
 
   module Language
 
+    module Visitor
+
+      def visit_node(name, attributes = {}, &block)
+        enter_node(name, attributes, &block)
+        visit_children(&block) if block
+        exit_node(name, attributes, &block)
+      end
+
+      def enter_node(_name, _attributes = {}, &_block)
+        raise 'Not implemented.'
+      end
+
+      def exit_node(_name, _attributes = {}, &_block)
+        raise 'Not implemented.'
+      end
+
+      def visit_children
+        value = yield
+        visit_content(value) if value
+      end
+
+      def visit_content(_value)
+        raise 'Not implemented.'
+      end
+
+    end
+
     module External
 
       class Syntax
@@ -197,31 +224,59 @@ module MPF
 
       end
 
-    end
+      module ParseTree
 
-    module Visitor
+        module Template
 
-      def visit_node(name, attributes = {}, &block)
-        enter_node(name, attributes, &block)
-        visit_children(&block) if block
-        exit_node(name, attributes, &block)
-      end
+          def opened_node(name, attributes)
+            "#{name}{#{attributes_list(attributes)}}"
+          end
 
-      def enter_node(_name, _attributes = {}, &_block)
-        raise 'Not implemented.'
-      end
+          def closed_node(name, attributes)
+            "/#{name}{#{attributes_list(attributes)}}"
+          end
 
-      def exit_node(_name, _attributes = {}, &_block)
-        raise 'Not implemented.'
-      end
+          def inner_content(value)
+            value.to_s
+          end
 
-      def visit_children
-        value = yield
-        visit_content(value) if value
-      end
+          def attributes_list(attributes)
+            result = attributes.map { |attrib| "#{attrib[0]}=\"#{attrib[1]}\"" }.join(', ')
+            result = ' ' + result + ' ' unless result.empty?
+            result
+          end
 
-      def visit_content(_value)
-        raise 'Not implemented.'
+        end
+
+        class Printer
+
+          include Visitor
+          include Template
+          include Text::Printer
+
+          def initialize
+            init_indentation
+          end
+
+          def visit_content(value)
+            print inner_content(value)
+            inline
+          end
+
+          def enter_node(name, attributes = {})
+            enter_section
+            indent_print opened_node(name, attributes)
+            indent
+          end
+
+          def exit_node(name, attributes = {})
+            unindent
+            indent_print closed_node(name, attributes)
+            exit_section
+          end
+
+        end
+
       end
 
     end
