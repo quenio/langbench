@@ -6,23 +6,12 @@ module MPF
 
     module Visitor
 
-      def visit_node(name, attributes = {}, &block)
-        enter_node(name, attributes, &block)
-        visit_children(&block) if block
-        exit_node(name, attributes, &block)
-      end
-
       def enter_node(_name, _attributes = {}, &_block)
         raise 'Not implemented.'
       end
 
       def exit_node(_name, _attributes = {}, &_block)
         raise 'Not implemented.'
-      end
-
-      def visit_children
-        value = yield
-        visit_content(value) if value
       end
 
       def visit_content(_value)
@@ -258,11 +247,6 @@ module MPF
             init_indentation
           end
 
-          def visit_content(value)
-            print inner_content(value)
-            inline
-          end
-
           def enter_node(name, attributes = {})
             enter_section
             indent_print opened_node(name, attributes)
@@ -275,6 +259,24 @@ module MPF
             exit_section
           end
 
+        end
+
+      end
+
+    end
+
+    module Internal
+
+      class Syntax
+
+        def self.evaluate(options = {}, &source_code)
+          new(options).instance_eval &source_code
+        end
+
+        private
+
+        def initialize(options = {})
+          @visitor = options[:visitor]
         end
 
       end

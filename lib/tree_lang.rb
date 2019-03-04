@@ -4,6 +4,25 @@ module MPF
 
   module TreeLang
 
+    class Syntax < Language::Internal::Syntax
+
+      def node(name, attributes = {}, &block)
+        @visitor.enter_node(name, attributes, &block)
+        if block
+          value = yield
+          visit_content(value) if value
+        end
+        @visitor.exit_node(name, attributes, &block)
+        nil
+      end
+
+      def content(value)
+        @visitor.visit_content(value)
+        nil
+      end
+
+    end
+
     class Node
 
       attr_reader :name
@@ -18,24 +37,28 @@ module MPF
 
     end
 
-    class Syntax
+    class Builder
 
-      def initialize(options = {})
-        @visitor = options[:visitor]
+      include Language::Visitor
+
+      attr_reader :root
+
+      def initialize
+        @parent = []
       end
 
-      def node(name, attributes = {}, &block)
-        @visitor.visit_node(name, attributes, &block)
-        nil
+      def enter_node(name, attributes = {}, &block)
+        node = Node.new(name, attributes)
+        @parent.last.children << node unless @parent.empty?
+        @parent.push node
       end
 
-      def content(value)
-        @visitor.visit_content(value)
-        nil
+      def exit_node(name, _attributes = {}, &block)
+        @root = @parent.pop
       end
 
-      def evaluate(&source_code)
-        instance_eval &source_code
+      def visit_content(value)
+        @parent.last.children << value
       end
 
     end
@@ -65,32 +88,6 @@ module MPF
         else
           syntax.content(node)
         end
-      end
-
-    end
-
-    class Builder
-
-      include Language::Visitor
-
-      attr_reader :root
-
-      def initialize
-        @parent = []
-      end
-
-      def enter_node(name, attributes = {}, &block)
-        node = Node.new(name, attributes)
-        @parent.last.children << node unless @parent.empty?
-        @parent.push node
-      end
-
-      def exit_node(name, _attributes = {}, &block)
-        @root = @parent.pop
-      end
-
-      def visit_content(value)
-        @parent.last.children << value
       end
 
     end
@@ -127,7 +124,7 @@ module MPF
 
     def self.build(&source_code)
       builder = Builder.new
-      visit visitor: builder, &source_code
+      evaluate visitor: builder, &source_code
       builder.root
     end
 
@@ -146,7 +143,7 @@ module MPF
 
     def self.print(options = {}, &source_code)
       format = options[:to]
-      visit visitor: @printer[format].new, &source_code
+      evaluate visitor: @printer[format].new, &source_code
     end
 
     @renderer = { xml: XML::Renderer }
@@ -154,12 +151,12 @@ module MPF
     def self.render(options = {}, &source_code)
       format = options[:to]
       renderer = @renderer[format].new
-      visit visitor: renderer, &source_code
+      evaluate visitor: renderer, &source_code
       renderer.text
     end
 
-    def self.visit(options = {}, &source_code)
-      Syntax.new(visitor: options[:visitor]).evaluate &source_code
+    def self.evaluate(options = {}, &source_code)
+      Syntax.evaluate visitor: options[:visitor], &source_code
     end
 
   end
