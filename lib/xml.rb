@@ -10,10 +10,10 @@ module MPF
 
       tokens etag_open: '</',
              name: /[A-Za-z0-9]+/,
-             value: /"[A-Za-z0-9\s]+"/
+             value: /"[[:print:]]+"/
 
       grammar start: %i[element],
-              element: %i[stag content? etag],
+              element: %i[stag content* etag],
               stag: ['<', :name, :attribute?, '>'],
               etag: [:etag_open, :name, '>'],
               attribute: [:name, '=', :value],
@@ -25,6 +25,9 @@ module MPF
 
       after :attribute do |attributes|
         if attributes.any?
+          raise "Expected name but found: #{attributes}" unless attributes[:name]
+          raise "Expected value but found: #{attributes}" unless attributes[:value]
+
           name = attributes[:name]
           value = attributes[:value][1..-2]
           @attributes = @attributes.merge(name => value)
