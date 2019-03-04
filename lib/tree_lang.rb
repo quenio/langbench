@@ -20,32 +20,6 @@ module MPF
 
       end
 
-      class Builder
-
-        include Language::Visitor
-
-        attr_reader :root
-
-        def initialize
-          @parent = []
-        end
-
-        def enter_node(name, attributes = {}, &block)
-          node = Node.new(name, attributes)
-          @parent.last.children << node unless @parent.empty?
-          @parent.push node
-        end
-
-        def exit_node(name, _attributes = {}, &block)
-          @root = @parent.pop
-        end
-
-        def visit_content(value)
-          @parent.last.children << value
-        end
-
-      end
-
     end
 
     module Internal
@@ -101,6 +75,32 @@ module MPF
 
       end
 
+      class Builder
+
+        include Language::Visitor
+
+        attr_reader :root
+
+        def initialize
+          @parent = []
+        end
+
+        def enter_node(name, attributes = {}, &block)
+          node = Node.new(name, attributes)
+          @parent.last.children << node unless @parent.empty?
+          @parent.push node
+        end
+
+        def exit_node(name, _attributes = {}, &block)
+          @root = @parent.pop
+        end
+
+        def visit_content(value)
+          @parent.last.children << value
+        end
+
+      end
+
       class Source
 
         def initialize(&source_code)
@@ -134,7 +134,7 @@ module MPF
     end
 
     def self.build(&source_code)
-      builder = Model::Builder.new
+      builder = Internal::Builder.new
       visit visitor: builder, &source_code
       builder.root
     end
@@ -142,7 +142,7 @@ module MPF
     @syntax = { xml: XML::External::Syntax }
 
     def self.parse(options = {})
-      # builder = Model::Builder.new
+      # builder = Internal::Builder.new
       language = options[:from]
       syntax = @syntax[language].new
       errors = syntax.parse(text: options[:text], visitor: Language::External::ParseTree::Printer.new)
