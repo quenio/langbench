@@ -89,6 +89,25 @@ module MPF
         end
       end
 
+      it 'does not recognizes a sentence with multiple names' do
+        check do
+          {
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { char: '<' }, { name: 'body' }, { char: '>' },
+              { name: 'text' },
+              { name: 'text' },
+              { char: '</' }, { name: 'body' }, { char: '>' },
+              { char: '</' }, { name: 'html' }, { char: '>' }
+            ],
+            expected: [
+              { missing: '</', found: { name: 'text' } },
+              { missing: '>', found: { char: '</' } }
+            ]
+          }
+        end
+      end
+
       it 'does not recognize a sentence missing initial character' do
         check do
           {
