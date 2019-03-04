@@ -10,7 +10,7 @@ module MPF
         @visitor.enter_node(name, attributes, &block)
         if block
           value = yield
-          visit_content(value) if value
+          @visitor.visit_content(value) if value
         end
         @visitor.exit_node(name, attributes, &block)
         nil
