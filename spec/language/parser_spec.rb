@@ -2,7 +2,7 @@ require 'language'
 
 module MPF
 
-  RSpec.describe Language::Parser do
+  RSpec.describe Language::External::Parser do
 
     def check
       rules = {
@@ -11,7 +11,7 @@ module MPF
         etag: ['</', :name, '>'],
         content: [{ any: %i[name number element] }]
       }
-      @parser = Language::Parser.new(grammar: rules)
+      @parser = Language::External::Parser.new(grammar: rules)
       options = yield
       errors = @parser.parse(options[:given])
       expect(errors).to eq(options[:expected])
