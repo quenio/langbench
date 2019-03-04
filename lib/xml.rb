@@ -14,7 +14,7 @@ module MPF
 
       grammar start: %i[element],
               element: %i[stag content* etag],
-              stag: ['<', :name, 'attribute*'.to_sym, '>'],
+              stag: ['<', :name, :'attribute*', '>'],
               etag: [:etag_open, :name, '>'],
               attribute: [:name, '=', :value],
               content: [{ any: %i[name element] }]
