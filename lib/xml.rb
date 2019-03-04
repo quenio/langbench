@@ -11,12 +11,16 @@ module MPF
 
         skip /\s*/
 
-        tokens name: /[A-Za-z0-9]+/,
+        tokens etag_open: '</',
+               name: /[A-Za-z0-9]+/,
                value: /"[A-Za-z0-9\s]+"/
 
-        grammar start: [:element],
-                element: ['<', :name, :attributes?, '>', :element?, :name?, :element?, '</', :name, '>'],
-                attributes: [:name, '=', :value]
+        grammar start: %i[element],
+                element: %i[stag content? etag],
+                stag: ['<', :name, :attributes?, '>'],
+                etag: [:etag_open, :name, '>'],
+                attributes: [:name, '=', :value],
+                content: [{ any: %i[name element] }]
 
       end
 
