@@ -78,7 +78,7 @@ module MPF
               { name: 'html' }, { char: '>' },
               { char: '</' }, { name: 'html' }, { char: '>' }
             ],
-            expected: [{ missing: '<' }]
+            expected: [{ missing: '<', found: { name: 'html' } }]
           }
         end
       end

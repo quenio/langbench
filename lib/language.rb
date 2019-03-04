@@ -193,7 +193,11 @@ module MPF
             rest.clear
           else
             log "\n>>> Error: #{@token&.inspect} - term: #{term}" unless optional
-            error(missing: term)
+            if @token
+              error(missing: term, found: @token)
+            else
+              error(missing: term)
+            end
           end
         end
 
