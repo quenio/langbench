@@ -1,8 +1,8 @@
-require 'language'
+require 'parser'
 
 module MPF
 
-  RSpec.describe Language::External::Parser do
+  RSpec.describe Parser do
 
     def check
       rules = {
@@ -11,7 +11,7 @@ module MPF
         etag: ['</', :name, '>'],
         content: [{ any: %i[name number element*] }]
       }
-      @parser = Language::External::Parser.new(grammar: rules)
+      @parser = Parser.new(grammar: rules)
       options = yield
       errors = @parser.parse(options[:given])
       expect(errors).to eq(options[:expected])
