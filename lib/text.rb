@@ -74,8 +74,8 @@ module MPF
       end
 
       def skip!(text)
-        substr = text[@skip]
-        substr ? (text.sub! substr, '') : text
+        substr = text[@skip] if @skip
+        text.sub!(substr, '') if substr
       end
 
       def next!(text)

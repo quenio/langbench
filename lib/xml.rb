@@ -6,18 +6,18 @@ module MPF
 
     class Syntax < Language::External::Syntax
 
-      skip /\s*/
+      tokens etag_open: '</'
 
-      tokens etag_open: '</',
-             name: /[A-Za-z0-9]+/,
-             value: /"[^"<&]*"/
-
-      grammar start: %i[element],
+      grammar start: %i[sp? element sp?],
               element: %i[stag content* etag],
-              stag: ['<', :name, :'attribute*', '>'],
+              stag: ['<', :name, :'attribute*', :sp?, '>'],
               etag: [:etag_open, :name, '>'],
-              attribute: [:name, '=', :value],
-              content: [{ any: %i[name element] }]
+              attribute: [:sp, :name, :sp?, '=', :sp?, :value],
+              content: { any: %i[element data] },
+              name: /[A-Za-z][A-Za-z0-9]*/,
+              value: { regex: /"[^"<&]*"/, firsts: /"/ },
+              data: /[^<&]+/,
+              sp: /\s+/
 
       before :stag do
         @attributes = {}

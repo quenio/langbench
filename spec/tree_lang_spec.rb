@@ -5,7 +5,7 @@ module MPF
   source_code = TreeLang.source do
     node(:html, lang: 'en') do
       node(:head) do
-        node(:title) { 'Books' }
+        node(:title) { 'Good Books' }
       end
       node(:body) do
         node(:div, class: 'header') do
@@ -30,7 +30,7 @@ module MPF
   print target_code
   print "\n\n"
 
-  print'>>> Parsing from XML:\n'
+  print">>> Parsing from XML:\n"
   model, errors = TreeLang.parse(from: :xml, text: target_code)
   if errors.empty?
     TreeLang.emit(from: model).print(to: :xml)

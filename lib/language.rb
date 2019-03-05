@@ -110,7 +110,7 @@ module MPF
         end
 
         def parse(tokens)
-          # tokens.each { |t| print "\n#{t}" }
+          log "\n>>> tokens: #{tokens.inspect}"
 
           raise 'Parser already running.' if @token or @tokens.any?
 
@@ -133,7 +133,6 @@ module MPF
           else
             @token = nil
           end
-          log "\n>>> Next Token: #{@token.inspect}"
         end
 
         def error(options = {})
@@ -184,20 +183,44 @@ module MPF
             end
             term = subterm if subterm
           end
+          if non_terminal? term and regex?(term)
+            text = ''
+            while @token and category_of(@token) == :char
+              text += text_of(@token)
+              next_token
+            end
+            if text.length > 1
+              @tokens.unshift(@token)
+              log "\n>>> Regex lookahead: #{text.inspect}"
+              match = text[regex_of(term)]
+              if match and text.start_with?(match)
+                log "\n>>> Regex match: #{match.inspect}"
+                @token = { raw(term) => match }
+                text = text.sub(match, '')
+              else
+                @token = { char: text[0] }
+                text = text[1..-1] || ''
+              end
+              @tokens = text.chars.map { |c| { char: c } } + @tokens
+              log "\n>>> tokens: #{@tokens.inspect}"
+            end
+            optional ||= optional?(term)
+          end
           log "\n>>> verify_term(#{term.inspect}, optional: #{optional.inspect})"
-          if non_terminal? term
+          if non_terminal? term and not regex?(term)
             loop do
               execute_rule rule_of(term), optional || optional?(term)
               break unless multiple?(term) and match? firsts_of(term)
 
-              log ">>> Multiples of term: #{term}"
+              log "\n>>> Multiples of term: #{term}"
             end
           elsif match? term
             log "\n>>> Token Match: #{@token&.inspect} - term: #{term}"
             attributes[category_of(@token)] = text_of(@token) if category_of(@token) != :char
             next_token
+            log "\n>>> Next Token: #{@token.inspect}"
           elsif optional
-            rest.clear
+            rest.clear unless optional?(term)
           else
             log "\n>>> Error: #{@token&.inspect} - term: #{term}" unless optional
             if @token
@@ -206,6 +229,14 @@ module MPF
               error(missing: term)
             end
           end
+        end
+
+        def regex?(term)
+          return false unless non_terminal? term
+
+          term = rule_of(term).terms
+          term = term[:regex] if term.is_a? Hash
+          term.is_a? Regexp
         end
 
         def alternative?(term)
@@ -218,16 +249,36 @@ module MPF
 
         def match?(*terms)
           terms.flat_map { |t| t }.any? do |term|
-            @token and (@token == { char: term } or category_of(@token) == raw(term))
+            if term.is_a? Regexp
+              category_of(@token) == :char and text_of(@token)[term] == text_of(@token)
+            else
+              @token == { char: term } or category_of(@token) == raw(term)
+            end
           end
         end
 
         def firsts_of(term)
           term, *_rest = rule_of(term).terms while non_terminal? term
-          if alternative?(term)
+          if regex?(term)
+            term = rule_of(term).terms
+            if term.is_a? Regexp
+              term
+            else
+              term[:firsts] || term[:regex]
+            end
+          elsif alternative?(term)
             alternatives_of(term).flat_map { |subterm| firsts_of(subterm) }
           else
             term
+          end
+        end
+
+        def regex_of(term)
+          term = rule_of(term).terms
+          if term.is_a? Regexp
+            term
+          else
+            term[:regex]
           end
         end
 
@@ -236,7 +287,7 @@ module MPF
         end
 
         def category_of(token)
-          token.first[0]
+          token.first[0] if token
         end
 
         def text_of(token)
@@ -286,7 +337,7 @@ module MPF
           end
 
           def attributes_list(attributes)
-            result = attributes.map { |attrib| "#{attrib[0]}=\"#{attrib[1]}\"" }.join(', ')
+            result = attributes.map { |attrib| "#{attrib[0]}=#{attrib[1].inspect}" }.join(', ')
             result = ' ' + result + ' ' unless result.empty?
             result
           end
