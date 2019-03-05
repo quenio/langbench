@@ -5,7 +5,10 @@ module MPF
   source_code = TreeLang.source do
     node(:html, lang: 'en') do
       node(:head) do
-        node(:title) { 'Good Books' }
+        node(:title) do
+          content 'Good '
+          node(:b) { 'Books' }
+        end
       end
       node(:body) do
         node(:div, class: 'header') do
