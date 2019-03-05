@@ -11,7 +11,7 @@ module MPF
       def initialize(grammar, name, terms)
         @grammar = grammar
         @name = name
-        @terms = [terms].flat_map { |t| t }.map { |t| Term.new(self, t) }
+        @terms = [terms].flat_map { |t| t }.map { |t| Term.of(t).new(self, t) }
       end
 
       def method_name
@@ -21,6 +21,15 @@ module MPF
     end
 
     class Term
+
+      def self.of(raw)
+        case raw
+        when String
+          Terminal
+        else
+          Term
+        end
+      end
 
       attr_reader :parent_rule
 
@@ -100,6 +109,14 @@ module MPF
         else
           @term
         end
+      end
+
+    end
+
+    class Terminal < Term
+
+      def match?(token)
+        token.raw == { char: raw }
       end
 
     end

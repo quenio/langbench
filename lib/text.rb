@@ -54,6 +54,33 @@ module MPF
 
     end
 
+    class Token
+
+      attr_reader :category
+      attr_reader :text
+
+      def initialize(options = {})
+        @category = options.first[0]
+        @text = options.first[1]
+      end
+
+      def raw
+        { @category => @text }
+      end
+
+      def ==(other)
+        return false unless other.is_a? Token
+        return true if other.equal? self
+
+        @category == other.category and @text == other.text
+      end
+
+      def hash
+        (category.to_s + text.to_s).hash
+      end
+
+    end
+
     class Tokenizer
 
       def initialize(options = {})
@@ -80,10 +107,10 @@ module MPF
 
       def next!(text)
         token = next_token(text)
-        if not token or not text.start_with? token.values[0]
-          token = { char: text[0] } unless text.empty?
+        if not token or not text.start_with? token.text
+          token = Token.new(char: text[0]) unless text.empty?
         end
-        text.sub! token.values[0], '' if token
+        text.sub! token.text, '' if token
         token
       end
 
@@ -93,10 +120,10 @@ module MPF
         token = nil
         while rule and (not token or not text.start_with? token)
           token = text[rule[1]]
-          id = rule[0]
+          category = rule[0]
           rule = rules.shift
         end
-        { id => token } if token
+        Token.new(category => token) if token
       end
 
     end

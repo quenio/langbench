@@ -1,4 +1,5 @@
 require 'grammar'
+require 'text'
 
 module MPF
 
@@ -48,7 +49,7 @@ module MPF
     end
 
     def check_pending_tokens
-      error(unrecognized: text_of(@token)) if @token and @errors.empty?
+      error(unrecognized: @token.text) if @token and @errors.empty?
     end
 
     def enter_node(rule)
@@ -92,8 +93,8 @@ module MPF
       end
       if term.non_terminal? and term.regex?
         text = ''
-        while @token and category_of(@token) == :char
-          text += text_of(@token)
+        while @token and @token.category == :char
+          text += @token.text
           next_token
         end
         if text.length > 1
@@ -102,13 +103,13 @@ module MPF
           match = text[term.regex]
           if match and text.start_with?(match)
             log "\n>>> Regex match: #{match.inspect}"
-            @token = { term.raw => match }
+            @token = Text::Token.new(term.raw => match)
             text = text.sub(match, '')
           else
-            @token = { char: text[0] }
+            @token = Text::Token.new(char: text[0])
             text = text[1..-1] || ''
           end
-          @tokens = text.chars.map { |c| { char: c } } + @tokens
+          @tokens = text.chars.map { |c| Text::Token.new(char: c) } + @tokens
           log "\n>>> tokens: #{@tokens.inspect}"
         end
         optional ||= term.optional?
@@ -122,16 +123,16 @@ module MPF
           log "\n>>> Multiples of term: #{term.raw.inspect}"
         end
       elsif match? term
-        log "\n>>> Token Match: #{@token&.inspect} - term: #{term.raw.inspect}"
-        attributes[category_of(@token)] = text_of(@token) if category_of(@token) != :char
+        log "\n>>> Token Match: #{@token&.raw.inspect} - term: #{term.raw.inspect}"
+        attributes[@token.category] = @token.text if @token.category != :char
         next_token
-        log "\n>>> Next Token: #{@token.inspect}"
+        log "\n>>> Next Token: #{@token&.raw.inspect}"
       elsif optional
         rest.clear unless term.optional?
       else
-        log "\n>>> Error: #{@token&.inspect} - term: #{term.raw.inspect}"
+        log "\n>>> Error: #{@token&.raw.inspect} - term: #{term.raw.inspect}"
         if @token
-          error(missing: term.raw, found: @token)
+          error(missing: term.raw, found: @token.raw)
         else
           error(missing: term.raw)
         end
@@ -139,21 +140,17 @@ module MPF
     end
 
     def match?(*terms)
+      return false unless @token
+
       terms.flat_map { |t| t }.any? do |term|
         if term.is_a? Regexp
-          category_of(@token) == :char and text_of(@token)[term] == text_of(@token)
+          @token.category == :char and @token.text[term] == @token.text
+        elsif term.is_a? Grammar::Terminal
+          term.match? @token
         else
-          @token == { char: term.raw } or category_of(@token) == term.raw
+          @token.category == term.raw
         end
       end
-    end
-
-    def category_of(token)
-      token.first[0] if token
-    end
-
-    def text_of(token)
-      token.first[1]
     end
 
     def log(_message)
