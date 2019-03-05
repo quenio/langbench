@@ -174,11 +174,9 @@ module MPF
             if term.alternative?
               term.alternatives.flat_map(&:firsts)
             elsif term.raw.is_a? Hash
-              if term.raw.is_a? Regexp
-                term
-              else
-                term.raw[:firsts] || term.raw[:regex]
-              end
+              term.raw[:firsts] || term.raw[:regex]
+            elsif term.raw.is_a? Regexp
+              term.raw
             else
               term
             end
@@ -328,8 +326,8 @@ module MPF
 
         def match?(*terms)
           terms.flat_map { |t| t }.any? do |term|
-            if term.raw.is_a? Regexp
-              category_of(@token) == :char and text_of(@token)[term.raw] == text_of(@token)
+            if term.is_a? Regexp
+              category_of(@token) == :char and text_of(@token)[term] == text_of(@token)
             else
               @token == { char: term.raw } or category_of(@token) == term.raw
             end
