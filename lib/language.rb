@@ -73,14 +73,33 @@ module MPF
 
         MAX_ERROR_COUNT = 3
 
+        class Grammar
+
+          def initialize(rules)
+            @rule_array = rules.map { |rule| Rule.new(self, *rule) }
+            @rule_hash = @rule_array.map { |rule| [rule.name, rule] }.to_h
+          end
+
+          def start_rule
+            @rule_array.first
+          end
+
+          def def_rule_of(term)
+            @rule_hash[term.raw]
+          end
+
+        end
+
         class Rule
 
+          attr_reader :grammar
           attr_reader :name
           attr_reader :terms
 
-          def initialize(name, terms)
+          def initialize(grammar, name, terms)
+            @grammar = grammar
             @name = name
-            @terms = terms
+            @terms = [terms].flat_map { |t| t }.map { |t| Term.new(self, t) }
           end
 
           def method_name
@@ -89,18 +108,94 @@ module MPF
 
         end
 
-        class Grammar
+        class Term
 
-          def self.of(rules)
-            rules.map { |rule| Rule.new(*rule) }
+          attr_reader :parent_rule
+
+          def initialize(parent_rule, term)
+            @parent_rule = parent_rule
+            @term = term
+          end
+
+          def grammar
+            parent_rule.grammar
+          end
+
+          def def_rule
+            grammar.def_rule_of(self)
+          end
+
+          def def_terms
+            grammar.def_rule_of(self).terms
+          end
+
+          def non_terminal?
+            @term.is_a? Symbol and def_rule
+          end
+
+          def optional?
+            @term.is_a? Symbol and @term.to_s.end_with? '?', '*'
+          end
+
+          def multiple?
+            @term.is_a? Symbol and @term.to_s.end_with? '+', '*'
+          end
+
+          def alternative?
+            @term.is_a? Hash and alternatives
+          end
+
+          def alternatives
+            @term[:any]&.map { |t| Term.new(parent_rule, t) }
+          end
+
+          def regex?
+            return false unless non_terminal?
+
+            term = def_terms
+            term = term[0].raw
+            term = term[:regex] if term.is_a? Hash
+            term.is_a? Regexp
+          end
+
+          def regex
+            term = def_terms
+            term = term[0].raw
+            if term.is_a? Regexp
+              term
+            else
+              term[:regex]
+            end
+          end
+
+          def firsts
+            term = self
+            term, *_rest = term.def_terms while term.non_terminal?
+            if term.alternative?
+              term.alternatives.flat_map(&:firsts)
+            elsif term.raw.is_a? Hash
+              if term.raw.is_a? Regexp
+                term
+              else
+                term.raw[:firsts] || term.raw[:regex]
+              end
+            else
+              term
+            end
+          end
+
+          def raw
+            if @term.is_a? Symbol
+              @term[/\A(\w+)/].to_sym
+            else
+              @term
+            end
           end
 
         end
 
         def initialize(options = {})
-          grammar = Grammar.of(options[:grammar])
-          @start_rule = grammar.first
-          @grammar = grammar.map { |rule| [rule.name, rule] }.to_h
+          @grammar = Grammar.new(options[:grammar])
           @visitor = options[:visitor]
           @pre_actions = options[:pre_actions] || {}
           @post_actions = options[:post_actions] || {}
@@ -119,7 +214,7 @@ module MPF
           @errors = []
 
           next_token
-          execute_rule @start_rule
+          execute_rule @grammar.start_rule
           check_pending_tokens
 
           @errors
@@ -177,13 +272,13 @@ module MPF
         end
 
         def verify_term(attributes, term, rest = {}, optional = false)
-          if alternative? term
-            subterm = alternatives_of(term).detect do |subterm|
-              match? firsts_of(subterm)
+          if term.alternative?
+            subterm = term.alternatives.detect do |subterm|
+              match? subterm.firsts
             end
             term = subterm if subterm
           end
-          if non_terminal? term and regex?(term)
+          if term.non_terminal? and term.regex?
             text = ''
             while @token and category_of(@token) == :char
               text += text_of(@token)
@@ -192,10 +287,10 @@ module MPF
             if text.length > 1
               @tokens.unshift(@token)
               log "\n>>> Regex lookahead: #{text.inspect}"
-              match = text[regex_of(term)]
+              match = text[term.regex]
               if match and text.start_with?(match)
                 log "\n>>> Regex match: #{match.inspect}"
-                @token = { raw(term) => match }
+                @token = { term.raw => match }
                 text = text.sub(match, '')
               else
                 @token = { char: text[0] }
@@ -204,86 +299,41 @@ module MPF
               @tokens = text.chars.map { |c| { char: c } } + @tokens
               log "\n>>> tokens: #{@tokens.inspect}"
             end
-            optional ||= optional?(term)
+            optional ||= term.optional?
           end
-          log "\n>>> verify_term(#{term.inspect}, optional: #{optional.inspect})"
-          if non_terminal? term and not regex?(term)
+          log "\n>>> verify_term(#{term.raw.inspect}, optional: #{optional.inspect})"
+          if term.non_terminal? and not term.regex?
             loop do
-              execute_rule rule_of(term), optional || optional?(term)
-              break unless multiple?(term) and match? firsts_of(term)
+              execute_rule term.def_rule, optional || term.optional?
+              break unless term.multiple? and match? term.firsts
 
-              log "\n>>> Multiples of term: #{term}"
+              log "\n>>> Multiples of term: #{term.raw.inspect}"
             end
           elsif match? term
-            log "\n>>> Token Match: #{@token&.inspect} - term: #{term}"
+            log "\n>>> Token Match: #{@token&.inspect} - term: #{term.raw.inspect}"
             attributes[category_of(@token)] = text_of(@token) if category_of(@token) != :char
             next_token
             log "\n>>> Next Token: #{@token.inspect}"
           elsif optional
-            rest.clear unless optional?(term)
+            rest.clear unless term.optional?
           else
-            log "\n>>> Error: #{@token&.inspect} - term: #{term}" unless optional
+            log "\n>>> Error: #{@token&.inspect} - term: #{term.raw.inspect}"
             if @token
-              error(missing: term, found: @token)
+              error(missing: term.raw, found: @token)
             else
-              error(missing: term)
+              error(missing: term.raw)
             end
           end
-        end
-
-        def regex?(term)
-          return false unless non_terminal? term
-
-          term = rule_of(term).terms
-          term = term[:regex] if term.is_a? Hash
-          term.is_a? Regexp
-        end
-
-        def alternative?(term)
-          term.is_a? Hash and alternatives_of(term)
-        end
-
-        def non_terminal?(term)
-          term.is_a? Symbol and rule_of(term)
         end
 
         def match?(*terms)
           terms.flat_map { |t| t }.any? do |term|
-            if term.is_a? Regexp
-              category_of(@token) == :char and text_of(@token)[term] == text_of(@token)
+            if term.raw.is_a? Regexp
+              category_of(@token) == :char and text_of(@token)[term.raw] == text_of(@token)
             else
-              @token == { char: term } or category_of(@token) == raw(term)
+              @token == { char: term.raw } or category_of(@token) == term.raw
             end
           end
-        end
-
-        def firsts_of(term)
-          term, *_rest = rule_of(term).terms while non_terminal? term
-          if regex?(term)
-            term = rule_of(term).terms
-            if term.is_a? Regexp
-              term
-            else
-              term[:firsts] || term[:regex]
-            end
-          elsif alternative?(term)
-            alternatives_of(term).flat_map { |subterm| firsts_of(subterm) }
-          else
-            term
-          end
-        end
-
-        def regex_of(term)
-          term = rule_of(term).terms
-          if term.is_a? Regexp
-            term
-          else
-            term[:regex]
-          end
-        end
-
-        def alternatives_of(term)
-          term[:any]
         end
 
         def category_of(token)
@@ -292,26 +342,6 @@ module MPF
 
         def text_of(token)
           token.first[1]
-        end
-
-        def rule_of(term)
-          @grammar[raw(term)]
-        end
-
-        def raw(term)
-          if term.is_a? Symbol
-            term[/\A(\w+)/].to_sym
-          else
-            term
-          end
-        end
-
-        def optional?(term)
-          term&.is_a? Symbol and term.to_s.end_with? '?', '*'
-        end
-
-        def multiple?(term)
-          term&.is_a? Symbol and term.to_s.end_with? '+', '*'
         end
 
         def log(_message)
