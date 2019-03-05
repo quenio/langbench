@@ -91,7 +91,7 @@ module MPF
         end
         term = subterm if subterm
       end
-      if term.non_terminal? and term.regex?
+      if term.regex_terminal?
         text = ''
         while @token and @token.category == :char
           text += @token.text
@@ -115,7 +115,7 @@ module MPF
         optional ||= term.optional?
       end
       log "\n>>> verify_term(#{term.raw.inspect}, optional: #{optional.inspect})"
-      if term.non_terminal? and not term.regex?
+      if term.non_terminal?
         loop do
           execute_rule term.def_rule, optional || term.optional?
           break unless term.multiple? and match? term.firsts

@@ -46,7 +46,7 @@ module MPF
       end
 
       def non_terminal?
-        @term.is_a? Symbol and def_rule
+        @term.is_a? Symbol and def_rule and not regex_terminal?
       end
 
       def terminal?
@@ -69,11 +69,9 @@ module MPF
         @term[:any]&.map { |t| Term.new(parent_rule, t).specialized }
       end
 
-      def regex?
-        return false unless non_terminal?
-
-        term = def_terms
-        term = term[0].raw
+      def regex_terminal?
+        term = def_terms if def_rule
+        term = term[0].raw if term
         term = term[:regex] if term.is_a? Hash
         term.is_a? Regexp
       end
@@ -90,7 +88,7 @@ module MPF
 
       def firsts
         term = self
-        term, *_rest = term.def_terms while term.non_terminal?
+        term, *_rest = term.def_terms while term.non_terminal? or term.regex_terminal?
         if term.alternative?
           term.alternatives.flat_map(&:firsts)
         elsif term.raw.is_a? Hash
@@ -115,7 +113,9 @@ module MPF
       end
 
       def specialized_class
-        if non_terminal?
+        if regex_terminal?
+          RegexTerminal
+        elsif non_terminal?
           NonTerminal
         elsif terminal?
           Terminal
@@ -135,6 +135,14 @@ module MPF
     end
 
     class NonTerminal < Term
+
+      def match?(token)
+        token.category == raw
+      end
+
+    end
+
+    class RegexTerminal < Term
 
       def match?(token)
         token.category == raw
