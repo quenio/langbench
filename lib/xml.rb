@@ -43,7 +43,7 @@ module MPF
       end
 
       after :content do |attributes, visitor|
-        visitor.visit_content(attributes[:name]) if attributes.any? and attributes[:name]
+        visitor.visit_content(attributes[:data]) if attributes.any? and attributes[:data]
       end
 
     end
