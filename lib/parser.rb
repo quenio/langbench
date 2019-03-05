@@ -149,6 +149,8 @@ module MPF
           term.match? @token
         elsif term.is_a? Grammar::NonTerminal
           term.match? @token
+        elsif term.is_a? Grammar::RegexTerminal
+          term.match? @token
         else
           @token.category == term.raw
         end
