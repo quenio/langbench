@@ -13,7 +13,7 @@ module MPF
       }
       @parser = Parser.new(grammar: rules)
       options = yield
-      errors = @parser.parse(options[:given])
+      errors = @parser.parse(options[:given].map { |t| Text::Token.new(t) })
       expect(errors).to eq(options[:expected])
     end
 
