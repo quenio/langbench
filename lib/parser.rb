@@ -147,6 +147,8 @@ module MPF
           @token.category == :char and @token.text[term] == @token.text
         elsif term.is_a? Grammar::Terminal
           term.match? @token
+        elsif term.is_a? Grammar::NonTerminal
+          term.match? @token
         else
           @token.category == term.raw
         end

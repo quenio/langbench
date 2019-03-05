@@ -11,25 +11,20 @@ module MPF
       def initialize(grammar, name, terms)
         @grammar = grammar
         @name = name
-        @terms = [terms].flat_map { |t| t }.map { |t| Term.of(t).new(self, t) }
+        @terms = [terms].flat_map { |t| t }.map { |t| Term.new(self, t) }
       end
 
       def method_name
         "#{name}_rule"
       end
 
+      def specialize_terms
+        @terms = @terms.map(&:specialized)
+      end
+
     end
 
     class Term
-
-      def self.of(raw)
-        case raw
-        when String
-          Terminal
-        else
-          Term
-        end
-      end
 
       attr_reader :parent_rule
 
@@ -54,6 +49,10 @@ module MPF
         @term.is_a? Symbol and def_rule
       end
 
+      def terminal?
+        @term.is_a? String
+      end
+
       def optional?
         @term.is_a? Symbol and @term.to_s.end_with? '?', '*'
       end
@@ -67,7 +66,7 @@ module MPF
       end
 
       def alternatives
-        @term[:any]&.map { |t| Term.new(parent_rule, t) }
+        @term[:any]&.map { |t| Term.new(parent_rule, t).specialized }
       end
 
       def regex?
@@ -111,6 +110,20 @@ module MPF
         end
       end
 
+      def specialized
+        specialized_class.new(@parent_rule, @term)
+      end
+
+      def specialized_class
+        if non_terminal?
+          NonTerminal
+        elsif terminal?
+          Terminal
+        else
+          Term
+        end
+      end
+
     end
 
     class Terminal < Term
@@ -121,9 +134,18 @@ module MPF
 
     end
 
+    class NonTerminal < Term
+
+      def match?(token)
+        token.category == raw
+      end
+
+    end
+
     def initialize(rules)
       @rule_array = rules.map { |rule| Rule.new(self, *rule) }
       @rule_hash = @rule_array.map { |rule| [rule.name, rule] }.to_h
+      @rule_array.each(&:specialize_terms)
     end
 
     def start_rule
