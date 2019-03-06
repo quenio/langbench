@@ -114,11 +114,11 @@ module MPF
 
       def specialized_class
         if regex_terminal?
-          RegexTerminal
+          RegexTerm
         elsif non_terminal?
-          NonTerminal
+          RuleTerm
         elsif terminal?
-          Terminal
+          TextTerm
         else
           Term
         end
@@ -126,7 +126,7 @@ module MPF
 
     end
 
-    class Terminal < Term
+    class TextTerm < Term
 
       def match?(token)
         token.raw == { char: raw }
@@ -134,7 +134,7 @@ module MPF
 
     end
 
-    class NonTerminal < Term
+    class RuleTerm < Term
 
       def match?(token)
         token.category == raw
@@ -142,7 +142,7 @@ module MPF
 
     end
 
-    class RegexTerminal < Term
+    class RegexTerm < Term
 
       def match?(token)
         token.category == raw

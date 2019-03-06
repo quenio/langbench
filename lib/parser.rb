@@ -145,11 +145,11 @@ module MPF
       terms.flat_map { |t| t }.any? do |term|
         if term.is_a? Regexp
           @token.category == :char and @token.text[term] == @token.text
-        elsif term.is_a? Grammar::Terminal
+        elsif term.is_a? Grammar::TextTerm
           term.match? @token
-        elsif term.is_a? Grammar::NonTerminal
+        elsif term.is_a? Grammar::RuleTerm
           term.match? @token
-        elsif term.is_a? Grammar::RegexTerminal
+        elsif term.is_a? Grammar::RegexTerm
           term.match? @token
         else
           @token.category == term.raw
