@@ -7,9 +7,11 @@ module MPF
     def check
       rules = {
         element: %i[stag content? etag],
-        stag: ['<', :name, '>'],
-        etag: ['</', :name, '>'],
-        content: [{ any: %i[name number element*] }]
+        stag: ['<', { any: %i[name name_regex] }, '>'],
+        etag: [:etag_open, { any: %i[name name_regex] }, '>'],
+        content: [{ any: %i[data_regex number element*] }],
+        name_regex: /[A-Za-z][A-Za-z0-9]*/,
+        data_regex: { regex: /[A-Za-z][A-Za-z0-9]*/, firsts: /[A-Za-z]/ }
       }
       @parser = Parser.new(grammar: rules)
       options = yield
@@ -19,12 +21,37 @@ module MPF
 
     describe '#parse' do
 
+      it 'recognizes a valid sentence matching the regex for name' do
+        check do
+          {
+            given: [
+              { char: '<' }, { char: 'd' }, { char: 'i' }, { char: 'v' }, { char: '>' },
+              { char: 'a' }, { char: 'b' }, { char: 'c' },
+              { etag_open: '</' }, { char: 'd' }, { char: 'i' }, { char: 'v' }, { char: '>' }
+            ],
+            expected: []
+          }
+        end
+      end
+
       it 'recognizes a valid sentence without optional' do
         check do
           {
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
-              { char: '</' }, { name: 'html' }, { char: '>' }
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
+            ],
+            expected: []
+          }
+        end
+      end
+
+      it 'recognizes a valid sentence without optional' do
+        check do
+          {
+            given: [
+              { char: '<' }, { name: 'html' }, { char: '>' },
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: []
           }
@@ -36,8 +63,8 @@ module MPF
           {
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
-              { name: 'text' },
-              { char: '</' }, { name: 'html' }, { char: '>' }
+              { char: 't' }, { char: 'e' }, { char: 'x' }, { char: 't' },
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: []
           }
@@ -50,7 +77,7 @@ module MPF
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
               { number: 123 },
-              { char: '</' }, { name: 'html' }, { char: '>' }
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: []
           }
@@ -63,8 +90,8 @@ module MPF
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
               { char: '<' }, { name: 'body' }, { char: '>' },
-              { char: '</' }, { name: 'body' }, { char: '>' },
-              { char: '</' }, { name: 'html' }, { char: '>' }
+              { etag_open: '</' }, { name: 'body' }, { char: '>' },
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: []
           }
@@ -78,31 +105,32 @@ module MPF
               { char: '<' }, { name: 'html' }, { char: '>' },
               { char: '<' }, { name: 'body' }, { char: '>' },
               { char: '<' }, { name: 'header' }, { char: '>' },
-              { char: '</' }, { name: 'header' }, { char: '>' },
+              { etag_open: '</' }, { name: 'header' }, { char: '>' },
               { char: '<' }, { name: 'footer' }, { char: '>' },
-              { char: '</' }, { name: 'footer' }, { char: '>' },
-              { char: '</' }, { name: 'body' }, { char: '>' },
-              { char: '</' }, { name: 'html' }, { char: '>' }
+              { etag_open: '</' }, { name: 'footer' }, { char: '>' },
+              { etag_open: '</' }, { name: 'body' }, { char: '>' },
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: []
           }
         end
       end
 
-      it 'does not recognizes a sentence with multiple names' do
+      it 'does not recognizes a sentence with multiple numbers' do
         check do
           {
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
               { char: '<' }, { name: 'body' }, { char: '>' },
-              { name: 'text' },
-              { name: 'text' },
-              { char: '</' }, { name: 'body' }, { char: '>' },
-              { char: '</' }, { name: 'html' }, { char: '>' }
+              { number: 123 },
+              { number: 456 },
+              { etag_open: '</' }, { name: 'body' }, { char: '>' },
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: [
-              { missing: '</', found: { name: 'text' } },
-              { missing: '>', found: { char: '</' } }
+              { missing: :etag_open, found: { number: 456 } },
+              { missing: { any: %i[name name_regex] }, found: { number: 456 } },
+              { missing: '>', found: { number: 456 } }
             ]
           }
         end
@@ -113,7 +141,7 @@ module MPF
           {
             given: [
               { name: 'html' }, { char: '>' },
-              { char: '</' }, { name: 'html' }, { char: '>' }
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }
             ],
             expected: [{ missing: '<', found: { name: 'html' } }]
           }
@@ -125,7 +153,7 @@ module MPF
           {
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
-              { char: '</' }, { name: 'html' }
+              { etag_open: '</' }, { name: 'html' }
             ],
             expected: [{ missing: '>' }]
           }
@@ -137,7 +165,7 @@ module MPF
           {
             given: [
               { char: '<' }, { name: 'html' }, { char: '>' },
-              { char: '</' }, { name: 'html' }, { char: '>' }, { char: '>' }
+              { etag_open: '</' }, { name: 'html' }, { char: '>' }, { char: '>' }
             ],
             expected: [{ unrecognized: '>' }]
           }
