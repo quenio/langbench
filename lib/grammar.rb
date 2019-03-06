@@ -45,8 +45,8 @@ module MPF
         grammar.def_rule_of(self).terms
       end
 
-      def non_terminal?
-        @term.is_a? Symbol and def_rule and not regex_terminal?
+      def rule?
+        @term.is_a? Symbol and def_rule and not regex?
       end
 
       def terminal?
@@ -69,7 +69,7 @@ module MPF
         @term[:any]&.map { |t| Term.new(parent_rule, t).specialized }
       end
 
-      def regex_terminal?
+      def regex?
         term = def_terms if def_rule
         term = term[0].raw if term
         term = term[:regex] if term.is_a? Hash
@@ -88,7 +88,7 @@ module MPF
 
       def firsts
         term = self
-        term, *_rest = term.def_terms while term.non_terminal? or term.regex_terminal?
+        term, *_rest = term.def_terms while term.rule? or term.regex?
         if term.alternative?
           term.alternatives.flat_map(&:firsts)
         elsif term.raw.is_a? Hash
@@ -113,9 +113,9 @@ module MPF
       end
 
       def specialized_class
-        if regex_terminal?
+        if regex?
           RegexTerm
-        elsif non_terminal?
+        elsif rule?
           RuleTerm
         elsif terminal?
           TextTerm
