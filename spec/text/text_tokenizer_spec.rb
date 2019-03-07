@@ -6,62 +6,79 @@ module MPF
 
     RSpec.describe Tokenizer do
 
-      it 'skips digits' do
-        tokenizer = Tokenizer.new(skip: /\d*/)
-        source = '234token'
+      describe 'skip!' do
 
-        tokenizer.skip!(source)
+        it 'skips digits' do
+          tokenizer = Tokenizer.new(skip: /\d*/)
+          source = '234token'
 
-        expect(source).to eq('token')
+          tokenizer.skip!(source)
+
+          expect(source).to eq('token')
+        end
+
       end
 
-      it 'finds next token with given single rule' do
-        tokenizer = Tokenizer.new(rules: { id: /[a-z]+/ })
-        source = 'token'
+      describe 'next_token' do
 
-        token = tokenizer.next_token(source)
+        it 'finds next token with given single rule' do
+          tokenizer = Tokenizer.new(rules: { id: /[a-z]+/ })
+          source = 'token'
 
-        expect(source).to eq('token')
-        expect(token).to eq(Token.new(id: 'token'))
+          token = tokenizer.next_token(source)
+
+          expect(source).to eq('token')
+          expect(token).to eq(Token.new(id: 'token'))
+        end
+
       end
 
-      it 'finds next token with given two rules' do
-        tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
-        source = 'token1234'
+      describe 'next!' do
 
-        tokens = tokenizer.next!(source)
-        expect(source).to eq('1234')
-        expect(tokens).to eq(Token.new(id: 'token'))
+        it 'finds next token with given two rules' do
+          tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
+          source = 'token1234'
 
-        tokens = tokenizer.next!(source)
-        expect(source).to eq('')
-        expect(tokens).to eq(Token.new(number: '1234'))
+          tokens = tokenizer.next!(source)
+          expect(source).to eq('1234')
+          expect(tokens).to eq(Token.new(id: 'token'))
+
+          tokens = tokenizer.next!(source)
+          expect(source).to eq('')
+          expect(tokens).to eq(Token.new(number: '1234'))
+        end
+
+        it 'does not find next token if not initial match' do
+          tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
+          source = '  token1234'
+
+          tokens = tokenizer.next!(source)
+          expect(source).to eq(' token1234')
+          expect(tokens).to eq(Token.new(char: ' '))
+        end
+
       end
 
-      it 'does not find next token if not initial match' do
-        tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
-        source = '  token1234'
-
-        tokens = tokenizer.next!(source)
-        expect(source).to eq(' token1234')
-        expect(tokens).to eq(Token.new(char: ' '))
-      end
-
-      it 'finds all tokens' do
-        tokenizer = Text::Tokenizer.new(skip: /\s*/, rules: { id: /[a-z]+/, number: /[0-9]+/ })
+      describe 'tokenize' do
+        it 'finds all tokens' do
+        tokenizer = Text::Tokenizer.new(
+          skip: /\s*/,
+          rules: { id: /[a-z]+/, number: /[0-9]+/ }
+        )
         source = '  1234  <token>   '
 
         tokens = tokenizer.tokenize(source)
 
         expect(source).to eq('  1234  <token>   ')
         expect(tokens).to eq(
-          [
-            Token.new(number: '1234'),
-            Token.new(char: '<'),
-            Token.new(id: 'token'),
-            Token.new(char: '>')
-          ]
-        )
+                            [
+                              Token.new(number: '1234'),
+                              Token.new(char: '<'),
+                              Token.new(id: 'token'),
+                              Token.new(char: '>')
+                            ]
+                          )
+      end
       end
 
     end

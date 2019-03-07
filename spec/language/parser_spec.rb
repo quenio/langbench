@@ -15,7 +15,7 @@ module MPF
       }
       @parser = Parser.new(grammar: rules)
       options = yield
-      errors = @parser.parse(options[:given].map { |t| Text::Token.new(t) })
+      errors = @parser.parse(options[:given])
       expect(errors).to eq(options[:expected])
     end
 
@@ -24,11 +24,7 @@ module MPF
       it 'recognizes a valid sentence matching the regex for name' do
         check do
           {
-            given: [
-              { char: '<' }, { char: 'd' }, { char: 'i' }, { char: 'v' }, { char: '>' },
-              { char: 'a' }, { char: 'b' }, { char: 'c' },
-              { etag_open: '</' }, { char: 'd' }, { char: 'i' }, { char: 'v' }, { char: '>' }
-            ],
+            given: '<div>abc</div>',
             expected: []
           }
         end

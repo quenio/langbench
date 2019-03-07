@@ -100,6 +100,10 @@ module MPF
         tokens
       end
 
+      def empty?
+        text.empty?
+      end
+
       def skip!(text)
         substr = text[@skip] if @skip
         text.sub!(substr, '') if substr
