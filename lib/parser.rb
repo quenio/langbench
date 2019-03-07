@@ -8,21 +8,20 @@ module MPF
     MAX_ERROR_COUNT = 3
 
     def initialize(options = {})
+      @tokenizer = options[:tokenizer] || Text::Tokenizer.new
       @grammar = Grammar.new(options[:grammar])
       @visitor = options[:visitor]
       @pre_actions = options[:pre_actions] || {}
       @post_actions = options[:post_actions] || {}
       @ignore_actions = options[:ignore_actions] || false
       @action_context = Object.new unless @ignore_actions
-      @tokens = []
+      @text = ''
     end
 
-    def parse(tokens)
-      log "\n>>> tokens: #{tokens.inspect}"
+    def parse(text)
+      raise 'Parser already running.' if @token or not @text.empty?
 
-      raise 'Parser already running.' if @token or @tokens.any?
-
-      @tokens = tokens.dup
+      @text = text.dup
       @token = nil
       @errors = []
 
@@ -35,12 +34,17 @@ module MPF
 
     private
 
-    def next_token
-      if @tokens.any?
-        @token, *@tokens = @tokens
-      else
-        @token = nil
+    def next_token(term = nil)
+      if term
+        raise "Method requires regex term or none, but found: #{term.inspect}" unless term&.regex?
+
+        saved_rules = @tokenizer.rules
+        @tokenizer.rules = { term.raw => term.regex }
+        @text = @token.text + @text if @token
       end
+      @tokenizer.skip!(@text)
+      @token = @text.empty? ? nil : @tokenizer.next!(@text)
+      @tokenizer.rules = saved_rules if term
     end
 
     def error(options = {})
@@ -92,26 +96,7 @@ module MPF
         term = subterm if subterm
       end
       if term.regex?
-        text = ''
-        while @token and @token.category == :char
-          text += @token.text
-          next_token
-        end
-        if text.length > 1
-          @tokens.unshift(@token)
-          log "\n>>> Regex lookahead: #{text.inspect}"
-          match = text[term.regex]
-          if match and text.start_with?(match)
-            log "\n>>> Regex match: #{match.inspect}"
-            @token = Text::Token.new(term.raw => match)
-            text = text.sub(match, '')
-          else
-            @token = Text::Token.new(char: text[0])
-            text = text[1..-1] || ''
-          end
-          @tokens = text.chars.map { |c| Text::Token.new(char: c) } + @tokens
-          log "\n>>> tokens: #{@tokens.inspect}"
-        end
+        next_token(term)
         optional ||= term.optional?
       end
       log "\n>>> verify_term(#{term.raw.inspect}, optional: #{optional.inspect})"

@@ -83,9 +83,11 @@ module MPF
 
     class Tokenizer
 
+      attr_accessor :rules
+
       def initialize(options = {})
         @skip = options[:skip]
-        @rules = options[:rules]
+        @rules = options[:rules] || {}
       end
 
       def tokenize(text)
@@ -100,13 +102,9 @@ module MPF
         tokens
       end
 
-      def empty?
-        text.empty?
-      end
-
       def skip!(text)
         substr = text[@skip] if @skip
-        text.sub!(substr, '') if substr
+        text.sub!(substr, '') if substr and text.start_with?(substr)
       end
 
       def next!(text)
@@ -119,10 +117,17 @@ module MPF
       end
 
       def next_token(text)
+        raise "Method requires text but found: #{text.inspect}" unless text.is_a? String
+        raise "Method requires defined rules but found: #{@rules.inspect}" unless @rules
+
         rules = @rules.dup
         rule = rules.shift
         token = nil
         while rule and (not token or not text.start_with? token)
+          unless rule[1].is_a? Regexp or rule[1].is_a? String
+            raise "Method requires text/regex rule but found: #{rule.inspect}"
+          end
+
           token = text[rule[1]]
           category = rule[0]
           rule = rules.shift

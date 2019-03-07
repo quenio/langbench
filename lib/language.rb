@@ -59,13 +59,14 @@ module MPF
             rules: self.class.token_rules
           )
           parser = Parser.new(
+            tokenizer: tokenizer,
             grammar: self.class.grammar_rules,
             visitor: options[:visitor],
             pre_actions: self.class.pre_actions,
             post_actions: self.class.post_actions,
             ignore_actions: options[:ignore_actions]
           )
-          parser.parse(tokenizer.tokenize(options[:text]))
+          parser.parse(options[:text])
         end
 
       end

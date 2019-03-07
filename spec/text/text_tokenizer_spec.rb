@@ -60,25 +60,27 @@ module MPF
       end
 
       describe 'tokenize' do
+
         it 'finds all tokens' do
-        tokenizer = Text::Tokenizer.new(
-          skip: /\s*/,
-          rules: { id: /[a-z]+/, number: /[0-9]+/ }
-        )
-        source = '  1234  <token>   '
+          tokenizer = Text::Tokenizer.new(
+            skip: /\s*/,
+            rules: { id: /[a-z]+/, number: /[0-9]+/ }
+          )
+          source = '  1234  <token>   '
 
-        tokens = tokenizer.tokenize(source)
+          tokens = tokenizer.tokenize(source)
 
-        expect(source).to eq('  1234  <token>   ')
-        expect(tokens).to eq(
-                            [
-                              Token.new(number: '1234'),
-                              Token.new(char: '<'),
-                              Token.new(id: 'token'),
-                              Token.new(char: '>')
-                            ]
-                          )
-      end
+          expect(source).to eq('  1234  <token>   ')
+          expect(tokens).to eq(
+            [
+              Token.new(number: '1234'),
+              Token.new(char: '<'),
+              Token.new(id: 'token'),
+              Token.new(char: '>')
+            ]
+          )
+        end
+
       end
 
     end
