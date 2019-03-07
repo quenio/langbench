@@ -75,7 +75,7 @@ module MPF
       class Printer
 
         include Visitor
-        include Text::Printer
+        include External::Text::Printer
         include Template
 
         def initialize
@@ -107,7 +107,7 @@ module MPF
 
       class Renderer < Printer
 
-        include Text::Renderer
+        include External::Text::Renderer
 
         def initialize
           super

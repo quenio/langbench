@@ -1,4 +1,4 @@
-require 'text'
+require 'language/external/text'
 require 'language/external/grammar'
 
 module MPF
