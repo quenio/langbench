@@ -113,9 +113,7 @@ module MPF
       end
 
       def specialized_class
-        if regex?
-          RegexTerm
-        elsif rule?
+        if rule?
           RuleTerm
         elsif terminal?
           TextTerm
@@ -135,14 +133,6 @@ module MPF
     end
 
     class RuleTerm < Term
-
-      def match?(token)
-        token.category == raw
-      end
-
-    end
-
-    class RegexTerm < Term
 
       def match?(token)
         token.category == raw
