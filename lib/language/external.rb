@@ -1,6 +1,6 @@
 require 'visitor'
 require 'text'
-require 'parser'
+require 'language/external/parser'
 
 module MPF
 
