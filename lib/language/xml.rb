@@ -72,7 +72,7 @@ module MPF
 
     class Printer
 
-      include Language::Visitor
+      include Visitor
       include Text::Printer
       include Template
 

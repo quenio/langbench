@@ -39,7 +39,7 @@ module MPF
 
     class Builder
 
-      include Language::Visitor
+      include Visitor
 
       attr_reader :root
 
