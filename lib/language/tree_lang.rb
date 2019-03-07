@@ -1,3 +1,4 @@
+require 'language/internal'
 require 'language/xml'
 
 module MPF
