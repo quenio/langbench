@@ -4,11 +4,6 @@ AllCops:
 Metrics/LineLength:
   Max: 100
 
-Metrics/BlockLength:
-  Exclude:
-    - 'app/controllers/concerns/*.rb'
-    - 'app/models/concerns/*.rb'
-
 Style/EmptyMethod:
   Enabled: false
 
