@@ -1,4 +1,4 @@
-require 'xml'
+require 'language/xml'
 
 module MPF
 

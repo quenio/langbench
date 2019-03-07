@@ -1,4 +1,4 @@
-require 'tree_lang'
+require 'language/tree_lang'
 
 module MPF
 
