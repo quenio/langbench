@@ -1,4 +1,4 @@
-require 'language'
+require 'language/external'
 
 module MPF
 
