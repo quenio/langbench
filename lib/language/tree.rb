@@ -42,7 +42,7 @@ module MPF
 
       class Builder
 
-        include Visitor
+        include Meta::Visitor
 
         attr_reader :root
 

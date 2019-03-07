@@ -74,7 +74,7 @@ module MPF
 
       class Printer
 
-        include Visitor
+        include Meta::Visitor
         include External::Text::Printer
         include Template
 

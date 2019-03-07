@@ -1,4 +1,4 @@
-require 'visitor'
+require 'language/meta'
 require 'language/external/text'
 require 'language/external/parser'
 
@@ -82,7 +82,7 @@ module MPF
 
         class Printer
 
-          include Visitor
+          include Meta::Visitor
           include Template
           include Text::Printer
 
