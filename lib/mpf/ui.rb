@@ -28,14 +28,24 @@ module MPF
       end
 
       def target_code
-        options_path = "#{@dir_path}/#{File.basename(@file_name, '.*')}.yml"
-        options =
-          if File.exists? options_path
-            yaml_file(options_path)
-          else
-            {}
-          end
-        TargetEmitter.new(@source_model, options).emit_code
+        TargetEmitter.new(@source_model, target_options).emit_code
+      end
+
+      def target_options
+        { config: target_config, locale: target_locale }
+      end
+
+      def target_config
+        config_path = "#{@dir_path}/#{File.basename(@file_name, '.*')}.yml"
+        if File.exists? config_path
+          yaml_file(config_path)
+        else
+          {}
+        end
+      end
+
+      def target_locale
+        { "%bills" => "_bills" }
       end
 
       class TargetEmitter < Tree::Emitter
@@ -44,7 +54,8 @@ module MPF
 
         def initialize(root, options = {})
           super(root)
-          @options = options
+          @config = options[:config]
+          @locale = options[:locale]
           @key = nil
           @value = nil
         end
@@ -74,7 +85,7 @@ module MPF
           return unless name.start_with? KEY_MARKER
 
           @key = name[1..-1]
-          @value = @options[@key]
+          @value = @config[@key]
         end
 
         def exit_scope(node)
@@ -89,15 +100,25 @@ module MPF
 
         def evaluated(node)
           if node.is_a? Tree::Node
-            attributes = node.attributes.map { |key, value| [key, sub(value)] }.to_h
+            attributes = node.attributes.map { |key, value| [key, env_sub(value)] }.to_h
             Tree::Node.new(node.name.dup, attributes, node.children.dup)
           else
             node
           end
         end
 
-        def sub(value)
-          value.sub('$', @value)
+        def env_sub(value)
+          result = value.sub('$', @value)
+          locale_sub(result)
+        end
+
+        def locale_sub(value)
+          keys = value.scan(/%[A-Za-z.][A-Za-z0-9]*/)
+          raise "Expected array but found: #{keys}" unless keys.is_a? Array
+
+          keys.reduce(value) do |value, key|
+            @locale[key] ? value.sub(key, @locale[key]) : value
+          end
         end
 
       end

@@ -1,7 +1,7 @@
 <view>
   <navigation>
     <:top-items>
-      <item title="$"></item>
+      <item title="%$"></item>
     </:top-items>
   </navigation>
 </view>
