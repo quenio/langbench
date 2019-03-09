@@ -100,11 +100,15 @@ module MPF
       end
 
       def print(options)
-        Tree.print(options, &@source_code)
+        Tree.print options, &@source_code
       end
 
       def render(options)
-        Tree.render(options, &@source_code)
+        Tree.render options, &@source_code
+      end
+
+      def evaluate(options)
+        Tree.evaluate options, &@source_code
       end
 
       def build

@@ -4,6 +4,14 @@ module MPF
 
     module Text
 
+      def file(path)
+        File.open(path, 'r').read
+      end
+
+      def write_file(path, text)
+        File.open(path, 'w') { |file| file.write(text) }
+      end
+
       module Renderer
 
         attr_reader :text
