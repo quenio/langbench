@@ -20,33 +20,79 @@ module MPF
       def generate(target_dir_path)
         if @errors.empty?
           path = "#{target_dir_path}/#{@file_name}"
-          text = Tree.emit(from: target_model).render(to: :xml)
+          text = target_code.render(to: :xml)
           write_file(path, text.strip)
         else
           @errors.each { |error| print "\nError: #{error}" }
         end
       end
 
-      def target_model
-        # config_path = "#{@dir_path}/#{File.basename(@file_name, '.*')}.yml"
-        # if File.exists? config_path
-        #   config = yaml_file(config_path)
-        # else
-        #   config = nil
-        # end
-        builder = TargetBuilder.new
-        Tree.emit(from: @source_model).evaluate visitor: builder
-        builder.root
+      def target_code
+        options_path = "#{@dir_path}/#{File.basename(@file_name, '.*')}.yml"
+        options =
+          if File.exists? options_path
+            yaml_file(options_path)
+          else
+            {}
+          end
+        TargetEmitter.new(@source_model, options).emit_code
       end
 
-      class TargetBuilder < Tree::Builder
+      class TargetEmitter < Tree::Emitter
 
-        def enter_node(name, attributes = {}, &block)
-          super(name, attributes, &block)
+        KEY_MARKER = ':'.freeze
+
+        def initialize(root, options = {})
+          super(root)
+          @options = options
+          @key = nil
+          @value = nil
         end
 
-        def exit_node(name, attributes = {}, &block)
-          super(name, attributes, &block)
+        def emit_node(syntax, node)
+          enter_scope(node) if node.is_a? Tree::Node
+
+          if @value.is_a? Array
+            items = @value
+            items.each do |value|
+              @value = value
+              node.children
+                  .map { |child| evaluated(child) }
+                  .each { |child| super(syntax, child) }
+            end
+          else
+            super(syntax, evaluated(node))
+          end
+
+          exit_scope(node) if node.is_a? Tree::Node
+        end
+
+        def enter_scope(node)
+          raise "Expected a node but found: #{node.inspect}" unless node.is_a? Tree::Node
+
+          name = node.name
+          return unless name.start_with? KEY_MARKER
+
+          @key = name[1..-1]
+          @value = @options[@key]
+        end
+
+        def exit_scope(node)
+          raise "Expected a node but found: #{node.inspect}" unless node.is_a? Tree::Node
+
+          name = node.name
+          return unless @key == name[1..-1]
+
+          @key = nil
+          @value = nil
+        end
+
+        def evaluated(node)
+          if node.is_a? Tree::Node
+            node
+          else
+            node
+          end
         end
 
       end

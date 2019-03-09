@@ -1,5 +1,7 @@
 <view>
-  <naviation>
-    <item title="Title"></item>
-  </naviation>
+  <navigation>
+    <:top-items>
+      <item title="$"></item>
+    </:top-items>
+  </navigation>
 </view>
