@@ -14,7 +14,7 @@ module MPF
               etag: [:etag_open, :name, '>'],
               attribute: [:sp, :name, :sp?, '=', :sp?, :value],
               content: { any: %i[element data] },
-              name: /[A-Za-z][A-Za-z0-9]*/,
+              name: /[A-Za-z:][A-Za-z0-9\-]*/,
               value: { regex: /"[^"<&]*"/, firsts: /"/ },
               data: /[^<&]+/,
               sp: /\s+/
