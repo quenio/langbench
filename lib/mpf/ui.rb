@@ -89,10 +89,15 @@ module MPF
 
         def evaluated(node)
           if node.is_a? Tree::Node
-            node
+            attributes = node.attributes.map { |key, value| [key, sub(value)] }.to_h
+            Tree::Node.new(node.name.dup, attributes, node.children.dup)
           else
             node
           end
+        end
+
+        def sub(value)
+          value.sub('$', @value)
         end
 
       end

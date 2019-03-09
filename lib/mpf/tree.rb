@@ -30,10 +30,10 @@ module MPF
       attr_reader :attributes
       attr_reader :children
 
-      def initialize(name, attributes)
+      def initialize(name, attributes, children = [])
         @name = name
         @attributes = attributes
-        @children = []
+        @children = children
       end
 
     end
