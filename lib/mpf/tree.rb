@@ -82,9 +82,13 @@ module MPF
       def emit_node(syntax, node)
         if node.is_a? Node
           emitter = self
-          syntax.node(node.name, node.attributes) do
-            node.children.each { |child| emitter.emit_node(syntax, child) }
-            nil
+          if node.children.any?
+            syntax.node(node.name, node.attributes) do
+              node.children.each { |child| emitter.emit_node(syntax, child) }
+              nil
+            end
+          else
+            syntax.node(node.name, node.attributes)
           end
         else
           syntax.content(node)
