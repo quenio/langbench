@@ -15,25 +15,27 @@ module MPF
         @dir_path = File.dirname(path)
         @file_name = File.basename(path)
         @source_model, @errors = Tree.parse(from: :xml, text: file(path))
-        @locale = options[:locale]
+        @locales = options[:locales]
       end
 
       def generate(target_dir_path)
         if @errors.empty?
-          path = "#{target_dir_path}/#{@file_name}"
-          text = target_code.render(to: :xml)
-          write_file(path, text.strip)
+          @locales.each do |locale_name, locale_config|
+            text = target_code_with(locale_config).render(to: :xml)
+            path = "#{target_dir_path}/#{locale_name}/#{@file_name}"
+            write_file(path, text.strip)
+          end
         else
           @errors.each { |error| print "\nError: #{error}" }
         end
       end
 
-      def target_code
-        TargetEmitter.new(@source_model, target_options).emit_code
+      def target_code_with(locale_config)
+        TargetEmitter.new(@source_model, target_options_with(locale_config)).emit_code
       end
 
-      def target_options
-        { config: config, locale: @locale }
+      def target_options_with(locale_config)
+        { config: config, locale: locale_config }
       end
 
       def config
@@ -180,9 +182,13 @@ module MPF
 
         @config = yaml_file("#{@root_dir.path}/#{CONFIG_FILE}")
 
-        @current_locale = @config['default-locale'] || 'en-US'
-        @locale_file_path = "#{@locales_dir_path}/#{@current_locale}.yml"
-        @locale = File.exists?(@locale_file_path) ? yaml_file(@locale_file_path) : {}
+        @locale_names = Dir["#{@locales_dir_path}/*.#{YAML::EXT}"].map do |path|
+          File.basename(path, ".#{YAML::EXT}")
+        end
+        @locales = @locale_names.map do |locale_name|
+          @locale_file_path = "#{@locales_dir_path}/#{locale_name}.#{YAML::EXT}"
+          [locale_name, File.exists?(@locale_file_path) ? yaml_file(@locale_file_path) : {}]
+        end.to_h
       end
 
       def compile
@@ -191,7 +197,7 @@ module MPF
       end
 
       def view(name)
-        View.new(path: "#{@views_dir.path}/#{name}.xml", locale: @locale)
+        View.new(path: "#{@views_dir.path}/#{name}.xml", locales: @locales)
       end
 
     end

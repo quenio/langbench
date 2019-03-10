@@ -1,0 +1,8 @@
+view:
+  navigation:
+    item:
+      title:
+        bills: Bills
+        installlments: Installments
+        expenses: Expenses
+        groceries: Groceries

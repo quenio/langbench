@@ -7,6 +7,8 @@ module MPF
 
     include External::Text
 
+    EXT = 'yml'.freeze
+
     def yaml_file(path)
       yaml(file(path))
     end
