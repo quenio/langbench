@@ -1,0 +1,8 @@
+view:
+  navigation:
+    item:
+      title:
+        bills: Contas
+        installlments: Prestações
+        expenses: Despesas
+        groceries: Mercado
