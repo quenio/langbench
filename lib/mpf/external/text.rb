@@ -50,6 +50,10 @@ module MPF
           @indent_next = false
         end
 
+        def new_line
+          @indent_next = true
+        end
+
         def enter_section
           @line_changed.push(@indent_next)
         end

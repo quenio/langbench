@@ -72,7 +72,10 @@ module MPF
             items = @value
             items.each do |value|
               @value = value
-              children.each { |child| emit_node(syntax, child) }
+              children.each do |child|
+                emit_node(syntax, child)
+                syntax.visitor.new_line if syntax.visitor.is_a? External::Text::Printer
+              end
             end
           else
             super(syntax, evaluated(node))
