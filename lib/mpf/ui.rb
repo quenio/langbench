@@ -165,7 +165,9 @@ module MPF
       include YAML
 
       def initialize(options = {})
-        @root_dir = Dir.new("#{Dir.pwd}/#{options[:path]}")
+        path = options[:path] || Dir.pwd
+        root_dir_path = Pathname.new(path).absolute? ? path : "#{Dir.pwd}/#{path}"
+        @root_dir = Dir.new(root_dir_path)
 
         @source_dir = Dir.new("#{@root_dir.path}/source")
         @views_dir = Dir.new("#{@source_dir.path}/views")
