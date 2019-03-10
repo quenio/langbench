@@ -63,6 +63,7 @@ module MPF
             enter_scope(node)
           elsif node.is_a? Tree::Node
             @locale_prefix += ".#{node.name}"
+            node = evaluated(node)
           end
 
           if @value.is_a? Array and node.children.any?
@@ -71,14 +72,17 @@ module MPF
             items = @value
             items.each do |value|
               @value = value
-              children.map { |child| evaluated(child) }
-                      .each { |child| super(syntax, child) }
+              children.each { |child| emit_node(syntax, child) }
             end
           else
             super(syntax, evaluated(node))
           end
 
-          exit_scope(node) if variable?(node)
+          if variable?(node)
+            exit_scope(node)
+          elsif node.is_a? Tree::Node
+            @locale_prefix = @locale_prefix[0..-(node.name.length + 2)]
+          end
         end
 
         def split_children(children)
@@ -138,7 +142,7 @@ module MPF
           keys = attrib_value.scan(/%[A-Za-z.][A-Za-z0-9]*/)
           raise "Expected array but found: #{keys}" unless keys.is_a? Array
 
-          locale_prefix = "#{@locale_prefix[1..-1]}.#{node.name}.#{attrib_name}"
+          locale_prefix = "#{@locale_prefix[1..-1]}.#{attrib_name}"
 
           keys.reduce(attrib_value) do |value, key|
             locale_key = key.start_with?('%.') ? locale_prefix + key[1..-1] : key[1..-1]
