@@ -134,7 +134,7 @@ module MPF
         end
 
         def env_sub(node, attrib_name, attrib_value)
-          attrib_value = attrib_value.sub('$', @value)
+          attrib_value = attrib_value.sub('$', @value) if @value
           locale_sub(node, attrib_name, attrib_value)
         end
 
@@ -178,6 +178,7 @@ module MPF
 
       def compile
         view_names.each do |view_name|
+          print "Compiling: #{view_name}\n"
           view(view_name).compile target_dir_path: @target_dir_path, locales: locales
         end
       end
