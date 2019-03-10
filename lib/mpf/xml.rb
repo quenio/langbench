@@ -4,6 +4,8 @@ module MPF
 
   module XML
 
+    EXT = 'xml'.freeze
+
     class Syntax < External::Syntax
 
       tokens etag_open: '</'

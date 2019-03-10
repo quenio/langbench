@@ -11,31 +11,26 @@ module MPF
       include YAML
 
       def initialize(options = {})
-        path = options[:path]
-        @dir_path = File.dirname(path)
-        @file_name = File.basename(path)
-        @source_model, @errors = Tree.parse(from: :xml, text: file(path))
-        @locales = options[:locales]
+        @path = options[:path]
+        @dir_path = File.dirname(@path)
+        @file_name = File.basename(@path)
       end
 
-      def generate(target_dir_path)
-        if @errors.empty?
-          @locales.each do |locale_name, locale_config|
-            text = target_code_with(locale_config).render(to: :xml)
-            path = "#{target_dir_path}/#{locale_name}/#{@file_name}"
+      def compile(options = {})
+        source_model, errors = Tree.parse(from: :xml, text: file(@path))
+        if errors.empty?
+          options[:locales].each do |locale_name, locale_config|
+            text = emit_target_code(source_model: source_model, locale: locale_config)
+            path = "#{options[:target_dir_path]}/#{locale_name}/#{@file_name}"
             write_file(path, text.strip)
           end
         else
-          @errors.each { |error| print "\nError: #{error}" }
+          errors.each { |error| print "\nError: #{error}" }
         end
       end
 
-      def target_code_with(locale_config)
-        TargetEmitter.new(@source_model, target_options_with(locale_config)).emit_code
-      end
-
-      def target_options_with(locale_config)
-        { config: config, locale: locale_config }
+      def emit_target_code(options = {})
+        TargetEmitter.new(options.dup.merge(config: config)).emit_code.render(to: :xml)
       end
 
       def config
@@ -51,8 +46,8 @@ module MPF
 
         KEY_MARKER = ':'.freeze
 
-        def initialize(root, options = {})
-          super(root)
+        def initialize(options = {})
+          super(options[:source_model])
           @config = options[:config]
           @locale = options[:locale]
           @key = nil
@@ -169,8 +164,6 @@ module MPF
 
       include YAML
 
-      CONFIG_FILE = 'module.yml'.freeze
-
       def initialize(options = {})
         @root_dir = Dir.new("#{Dir.pwd}/#{options[:path]}")
 
@@ -179,25 +172,35 @@ module MPF
 
         @locales_dir_path = "#{@source_dir.path}/locales"
         @target_dir_path = "#{@root_dir.path}/target"
+      end
 
-        @config = yaml_file("#{@root_dir.path}/#{CONFIG_FILE}")
+      def compile
+        view_names.each do |view_name|
+          view(view_name).compile target_dir_path: @target_dir_path, locales: locales
+        end
+      end
 
-        @locale_names = Dir["#{@locales_dir_path}/*.#{YAML::EXT}"].map do |path|
+      def locale_names
+        Dir["#{@locales_dir_path}/*.#{YAML::EXT}"].map do |path|
           File.basename(path, ".#{YAML::EXT}")
         end
-        @locales = @locale_names.map do |locale_name|
+      end
+
+      def locales
+        locale_names.map do |locale_name|
           @locale_file_path = "#{@locales_dir_path}/#{locale_name}.#{YAML::EXT}"
           [locale_name, File.exists?(@locale_file_path) ? yaml_file(@locale_file_path) : {}]
         end.to_h
       end
 
-      def compile
-        Dir.mkdir @target_dir_path unless Dir.exists? @target_dir_path
-        view(@config['main-view']).generate @target_dir_path
+      def view(name)
+        View.new(path: "#{@views_dir.path}/#{name}.xml")
       end
 
-      def view(name)
-        View.new(path: "#{@views_dir.path}/#{name}.xml", locales: @locales)
+      def view_names
+        Dir["#{@views_dir.path}/*.#{XML::EXT}"].map do |path|
+          File.basename(path, ".#{XML::EXT}")
+        end
       end
 
     end
