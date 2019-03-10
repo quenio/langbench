@@ -65,19 +65,35 @@ module MPF
             @locale_prefix += ".#{node.name}"
           end
 
-          if @value.is_a? Array
+          if @value.is_a? Array and node.children.any?
+            children = node.children
+            children = children[1..-1] if empty_node? children[0]
             items = @value
             items.each do |value|
               @value = value
-              node.children
-                  .map { |child| evaluated(child) }
-                  .each { |child| super(syntax, child) }
+              children.map { |child| evaluated(child) }
+                      .each { |child| super(syntax, child) }
             end
           else
             super(syntax, evaluated(node))
           end
 
           exit_scope(node) if variable?(node)
+        end
+
+        def split_children(children)
+          if empty_node? children[0]
+            first = children[0]
+            children = children[1..-1]
+          end
+          if empty_node? children[-1]
+            children = children[0..-2]
+          end
+          [first, children]
+        end
+
+        def empty_node?(node)
+          node.is_a? String and node.strip.empty?
         end
 
         def enter_scope(node)
