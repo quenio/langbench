@@ -63,12 +63,12 @@ module MPF
             enter_scope(node)
           elsif node.is_a? Tree::Node
             @locale_prefix += ".#{node.name}"
-            node = evaluated(node)
           end
 
           if @value.is_a? Array and node.children.any?
             children = node.children
             children = children[1..-1] if empty_node? children[0]
+            children = children[0..-2] if empty_node? children[-1]
             items = @value
             items.each do |value|
               @value = value
