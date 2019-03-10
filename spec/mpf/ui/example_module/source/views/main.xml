@@ -1,7 +1,7 @@
 <view>
   <navigation>
     <:top-items>
-      <item title="%.$" view="another_view"></item>
+      <item title="%.$" otherTitle="%view.navigation.item.title.bills" view="another_view"></item>
     </:top-items>
   </navigation>
 </view>

@@ -126,24 +126,25 @@ module MPF
 
         def evaluated(node)
           if node.is_a? Tree::Node
-            attributes = node.attributes.map { |key, value| [key, env_sub(node, key, value)] }.to_h
+            attributes = node.attributes.map { |key, value| [key, env_sub(key, value)] }.to_h
             Tree::Node.new(node.name.dup, attributes, node.children.dup)
           else
             node
           end
         end
 
-        def env_sub(node, attrib_name, attrib_value)
+        def env_sub(attrib_name, attrib_value)
           attrib_value = attrib_value.sub('$', @value) if @value
-          locale_sub(node, attrib_name, attrib_value)
+          locale_sub(attrib_name, attrib_value)
         end
 
-        def locale_sub(node, attrib_name, attrib_value)
-          keys = attrib_value.scan(/%[A-Za-z.][A-Za-z0-9]*/)
+        def locale_sub(attrib_name, attrib_value)
+          keys = attrib_value.scan(/(%(\.?[A-Za-z][A-Za-z0-9]*)+)/)
           raise "Expected array but found: #{keys}" unless keys.is_a? Array
 
           locale_prefix = "#{@locale_prefix[1..-1]}.#{attrib_name}"
 
+          keys = keys.map { |key| key[0] }
           keys.reduce(attrib_value) do |value, key|
             locale_key = key.start_with?('%.') ? locale_prefix + key[1..-1] : key[1..-1]
             locale_value = locale_value_of(locale_key)
