@@ -1,3 +1,5 @@
 <view title="Contas">
-  <resource path="/bills">$.description</resource>
+  <resource path="/bills">
+    <label>Description: <expression language="JSONPath">$.description</expression></label>
+  </resource>
 </view>

@@ -45,6 +45,7 @@ module MPF
       class TargetEmitter < Tree::Emitter
 
         KEY_MARKER = ':'.freeze
+        JSON_PATH_MARKER = '$'.freeze
 
         def initialize(options = {})
           super(options[:source_model])
@@ -52,27 +53,41 @@ module MPF
           @locale = options[:locale]
           @key = nil
           @value = nil
-          @locale_prefix = ''
+          @tree_path = ''
         end
 
         def emit_node(syntax, node)
           if variable?(node)
-            enter_scope(node)
+            enter_scope node
           elsif node.is_a? Tree::Node
-            @locale_prefix += ".#{node.name}"
+            @tree_path += ".#{node.name}"
           end
 
-          if @value.is_a? Array and node.children.any?
-            emit_children(syntax, node.children)
+          if orphan_text? node
+            emit_label syntax, node
+          elsif orphan_expression? node
+            emit_expression syntax, node
+          elsif @value.is_a? Array and node.children.any?
+            emit_children syntax, node.children
           else
-            super(syntax, evaluated(node))
+            super syntax, evaluated(node)
           end
 
           if variable?(node)
-            exit_scope(node)
+            exit_scope node
           elsif node.is_a? Tree::Node
-            @locale_prefix = @locale_prefix[0..-(node.name.length + 2)]
+            @tree_path = @tree_path[0..-(node.name.length + 2)]
           end
+        end
+
+        def emit_label(syntax, node)
+          new_line syntax
+          emit_node syntax, labeled(node)
+          new_line syntax
+        end
+
+        def emit_expression(syntax, node)
+          extracted_expressions(node).each { |subnode| emit_node(syntax, subnode) }
         end
 
         def emit_children(syntax, children)
@@ -82,10 +97,14 @@ module MPF
           items.each do |value|
             @value = value
             children.each do |child|
-              emit_node(syntax, child)
-              syntax.visitor.new_line if syntax.visitor.is_a? External::Text::Printer
+              emit_node syntax, child
+              new_line syntax
             end
           end
+        end
+
+        def new_line(syntax)
+          syntax.visitor.new_line if syntax.visitor.is_a? External::Text::Printer
         end
 
         def split_children(children)
@@ -123,8 +142,65 @@ module MPF
           @value = nil
         end
 
+        def orphan_expression?(node)
+          text? node and node.include? JSON_PATH_MARKER and not under? 'expression'
+        end
+
+        def orphan_text?(node)
+          text? node and not under? 'label' and not under? 'expression'
+        end
+
+        def text?(node)
+          node.is_a? String and not empty_node? node
+        end
+
+        def under?(node_name)
+          @tree_path.end_with? ".#{node_name}"
+        end
+
         def variable?(node)
           node.is_a? Tree::Node and node.name.start_with? KEY_MARKER
+        end
+
+        def extracted_expressions(node)
+          tokens = tokenized_expressions_of(node)
+          expected "Expected JSON Path or some text but found: #{text.inspect}" unless tokens.any?
+
+          expressions_of(tokens)
+        end
+
+        def tokenized_expressions_of(node)
+          tokenizer = External::Text::Tokenizer.new(
+            rules: {
+              expr: /\$\.?([A-Za-z][A-Za-z0-9]*(\.[A-Za-z][A-Za-z0-9]*)*)?/,
+              text: /[^$]*/
+            }
+          )
+          tokenizer.tokenize(node)
+        end
+
+        def expressions_of(tokens)
+          tokens.map do |token|
+            if token.category == :text
+              token.text
+            else
+              expression_node(token.text)
+            end
+          end
+        end
+
+        def expression_node(text)
+          Tree::Node.new(
+            'expression',
+            { 'language' => 'JSONPath' },
+            [text]
+          )
+        end
+
+        def labeled(node)
+          raise "Expected text node but found: #{node.inspect}" unless text? node
+
+          Tree::Node.new('label', {}, [node])
         end
 
         def evaluated(node)
@@ -145,7 +221,7 @@ module MPF
           keys = attrib_value.scan(/(%(\.?[A-Za-z][A-Za-z0-9]*)+)/)
           raise "Expected array but found: #{keys}" unless keys.is_a? Array
 
-          locale_prefix = "#{@locale_prefix[1..-1]}.#{attrib_name}"
+          locale_prefix = "#{@tree_path[1..-1]}.#{attrib_name}"
 
           keys = keys.map { |key| key[0] }
           keys.reduce(attrib_value) do |value, key|
