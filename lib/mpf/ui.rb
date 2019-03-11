@@ -134,7 +134,7 @@ module MPF
         end
 
         def env_sub(attrib_name, attrib_value)
-          attrib_value = attrib_value.sub('$', @value) if @value
+          attrib_value = attrib_value.sub(':.', @value) if @value
           locale_sub(attrib_name, attrib_value)
         end
 
