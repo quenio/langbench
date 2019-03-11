@@ -1,0 +1,3 @@
+<view title="Bills">
+  <resource path="/bills">$.description</resource>
+</view>

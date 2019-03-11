@@ -63,17 +63,7 @@ module MPF
           end
 
           if @value.is_a? Array and node.children.any?
-            children = node.children
-            children = children[1..-1] if empty_node? children[0]
-            children = children[0..-2] if empty_node? children[-1]
-            items = @value
-            items.each do |value|
-              @value = value
-              children.each do |child|
-                emit_node(syntax, child)
-                syntax.visitor.new_line if syntax.visitor.is_a? External::Text::Printer
-              end
-            end
+            emit_children(syntax, node.children)
           else
             super(syntax, evaluated(node))
           end
@@ -82,6 +72,19 @@ module MPF
             exit_scope(node)
           elsif node.is_a? Tree::Node
             @locale_prefix = @locale_prefix[0..-(node.name.length + 2)]
+          end
+        end
+
+        def emit_children(syntax, children)
+          children = children[1..-1] if empty_node? children[0]
+          children = children[0..-2] if empty_node? children[-1]
+          items = @value
+          items.each do |value|
+            @value = value
+            children.each do |child|
+              emit_node(syntax, child)
+              syntax.visitor.new_line if syntax.visitor.is_a? External::Text::Printer
+            end
           end
         end
 

@@ -1,0 +1,3 @@
+<view title="%view.navigation.item.title.bills">
+  <resource path="/bills">$.description</resource>
+</view>
