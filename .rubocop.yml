@@ -4,6 +4,9 @@ AllCops:
 Metrics/LineLength:
   Max: 100
 
+Style/ClassAndModuleChildren:
+  Enabled: false
+
 Style/EmptyMethod:
   Enabled: false
 

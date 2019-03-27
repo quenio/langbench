@@ -1,3 +1,6 @@
+require 'mpf/meta'
+require 'mpf/external/text'
+
 module MPF
 
   module External
