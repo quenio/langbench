@@ -15,7 +15,7 @@ module MPF
 
           tokens proposition_literal: /true|false/,
                  proposition_prefix: /not/,
-                 proposition_infix: /and|or|implies|iif/,
+                 proposition_infix: /and|or|if|iif/,
                  proposition_variable: /[a-z][a-z0-9_]*/
 
           grammar proposition: %i[basic_proposition binary_proposition*],
@@ -42,38 +42,73 @@ module MPF
 
         class Interpreter
 
+          class << self
+            attr_accessor :interpretation
+          end
+
+          def self.interpret(rule)
+            @interpretation ||= {}
+            @interpretation = @interpretation.merge(rule)
+          end
+
+          interpret true: true
+
+          interpret false: false
+
+          interpret not: {
+            true => false,
+            false => true
+          }
+
+          interpret and: {
+            true => {
+              true => true,
+              false => false
+            },
+            false => {
+              true => false,
+              false => false
+            }
+          }
+
+          interpret or: {
+            true => {
+              true => true,
+              false => true
+            },
+            false => {
+              true => true,
+              false => false
+            }
+          }
+
+          interpret if: {
+            true => {
+              true => true,
+              false => false
+            },
+            false => {
+              true => true,
+              false => true
+            }
+          }
+
+          interpret iif: {
+            true => {
+              true => true,
+              false => false
+            },
+            false => {
+              true => false,
+              false => true
+            }
+          }
+
           attr_reader :values
 
           def initialize(interpretation = {})
             @values = []
-            @interpretation = interpretation.merge(
-              true: true,
-              false: false,
-              not: {
-                true => false,
-                false => true
-              },
-              and: {
-                true => {
-                  true => true,
-                  false => false
-                },
-                false => {
-                  true => false,
-                  false => false
-                }
-              },
-              or: {
-                true => {
-                  true => true,
-                  false => true
-                },
-                false => {
-                  true => true,
-                  false => false
-                }
-              }
-            )
+            @interpretation = interpretation.merge(self.class.interpretation)
           end
 
           def evaluate_basic_proposition(attributes = {})

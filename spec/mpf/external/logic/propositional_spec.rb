@@ -16,34 +16,145 @@ module MPF::External::Logic
 
     describe '#interpret' do
 
-      it 'literal: "true"' do
-        interpret(text: 'true')
+      describe 'literal' do
+
+        it 'is true' do
+          interpret(text: 'true')
+        end
+
+        it 'is false' do
+          interpret(text: 'false', value: false)
+        end
+
       end
 
-      it 'literal: "false"' do
-        interpret(text: 'false', value: false)
+      describe 'variable' do
+
+        it 'is true' do
+          interpret(text: 'lights_on', interpretation: { lights_on: true })
+        end
+
+        it 'is false' do
+          interpret(text: 'lights_on', interpretation: { lights_on: false }, value: false)
+        end
+
       end
 
-      it 'variable' do
-        interpret(text: 'lights_on', interpretation: { lights_on: true })
+      describe '"not" proposition' do
+
+        it 'is true' do
+          interpret(text: 'not lights_on', interpretation: { lights_on: false })
+        end
+
+        it 'is false' do
+          interpret(text: 'not lights_on', interpretation: { lights_on: true }, value: false)
+        end
+
       end
 
-      it 'unary proposition' do
-        interpret(text: 'not lights_on', interpretation: { lights_on: false })
+      describe '"and" proposition' do
+
+        it 'is true' do
+          interpret(
+            text: 'doors_closed and lights_on',
+            interpretation: { lights_on: true, doors_closed: true }
+          )
+        end
+
+        it 'is false' do
+          [[true, false], [false, true], [false, false]].each do |lights_on, doors_closed|
+            interpret(
+              text: 'doors_closed and lights_on',
+              interpretation: { lights_on: lights_on, doors_closed: doors_closed },
+              value: false
+            )
+          end
+        end
+
       end
 
-      it 'binary proposition' do
-        interpret(
-          text: 'doors_closed and lights_on',
-          interpretation: { lights_on: true, doors_closed: true }
-        )
+      describe '"or" proposition' do
+
+        it 'is true' do
+          [[true, true], [true, false], [false, true]].each do |lights_on, doors_closed|
+            interpret(
+              text: 'doors_closed or lights_on',
+              interpretation: { lights_on: lights_on, doors_closed: doors_closed }
+            )
+          end
+        end
+
+        it 'is false' do
+          interpret(
+            text: 'doors_closed or lights_on',
+            interpretation: { lights_on: false, doors_closed: false },
+            value: false
+          )
+        end
+
       end
 
-      it 'compound proposition' do
-        interpret(
-          text: 'doors_closed and lights_on or false',
-          interpretation: { lights_on: true, doors_closed: true }
-        )
+      describe '"if" proposition' do
+
+        it 'is true' do
+          [[true, true], [false, true], [false, false]].each do |lights_on, doors_closed|
+            interpret(
+              text: 'doors_closed if lights_on',
+              interpretation: { lights_on: lights_on, doors_closed: doors_closed }
+            )
+          end
+        end
+
+        it 'is false' do
+          interpret(
+            text: 'doors_closed if lights_on',
+            interpretation: { lights_on: true, doors_closed: false },
+            value: false
+          )
+        end
+
+      end
+
+      describe '"iif" proposition' do
+
+        it 'is true' do
+          [[true, true], [false, false]].each do |lights_on, doors_closed|
+            interpret(
+              text: 'doors_closed iif lights_on',
+              interpretation: { lights_on: lights_on, doors_closed: doors_closed }
+            )
+          end
+        end
+
+        it 'is false' do
+          [[true, false], [false, true]].each do |lights_on, doors_closed|
+            interpret(
+              text: 'doors_closed iif lights_on',
+              interpretation: { lights_on: lights_on, doors_closed: doors_closed },
+              value: false
+            )
+          end
+        end
+
+      end
+
+      describe 'compound proposition' do
+
+        it 'is true' do
+          interpret(
+            text: 'doors_closed and lights_on or false',
+            interpretation: { lights_on: true, doors_closed: true }
+          )
+        end
+
+        it 'is false' do
+          interpret(
+            text: 'doors_closed and lights_on and false',
+            interpretation: { lights_on: true, doors_closed: true },
+            value: false
+          )
+        end
+
       end
 
     end
