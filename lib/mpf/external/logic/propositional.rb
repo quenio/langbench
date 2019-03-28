@@ -12,16 +12,16 @@ module MPF::External::Logic::Propositional
            proposition_infix: /and|or|implies|iif/,
            proposition_variable: /[a-z][a-z0-9_]*/
 
-    grammar proposition: %i[proposition_statement binary_proposition*],
-            proposition_statement:
+    grammar proposition: %i[basic_proposition binary_proposition*],
+            basic_proposition:
             {
               any: %i[proposition_literal proposition_variable unary_proposition]
             },
             unary_proposition: %i[proposition_prefix proposition],
             binary_proposition: %i[proposition_infix proposition]
 
-    after :proposition_statement do |attributes, interpreter|
-      interpreter.evaluate_proposition_statement(attributes)
+    after :basic_proposition do |attributes, interpreter|
+      interpreter.evaluate_basic_proposition(attributes)
     end
 
     after :unary_proposition do |attributes, interpreter|
@@ -70,7 +70,7 @@ module MPF::External::Logic::Propositional
       )
     end
 
-    def evaluate_proposition_statement(attributes = {})
+    def evaluate_basic_proposition(attributes = {})
       variable_name = attributes[:proposition_variable]
       literal_name = attributes[:proposition_literal]
       @values.push(@interpretation[variable_name.to_sym]) if variable_name
