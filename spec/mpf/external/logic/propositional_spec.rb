@@ -1,42 +1,47 @@
-require 'mpf/external/parse_tree'
 require 'mpf/external/logic/propositional'
 
-module MPF::External::Logic::Propositional
+RSpec.describe MPF::External::Logic::Propositional do
 
-  RSpec.describe Syntax do
+  def interpret(params)
+    errors, value = MPF::External::Logic::Propositional.interpret(params)
+    expect(errors).to eq([])
+    if params[:value].nil?
+      expect(value).to eq(true)
+    else
+      expect(value).to eq(params[:value])
+    end
+  end
 
-    def parses(text)
-      printer = MPF::External::ParseTree::Printer.new
-      errors = Syntax.new.parse(text: text, visitor: printer, ignore_actions: true)
-      expect(errors).to eq([])
+  describe '#interpret' do
+
+    it 'literal: "true"' do
+      interpret(text: 'true')
     end
 
-    describe '#parse' do
+    it 'literal: "false"' do
+      interpret(text: 'false', value: false)
+    end
 
-      it 'recognizes literal: "true"' do
-        parses('true')
-      end
+    it 'variable' do
+      interpret(text: 'lights_on', interpretation: { lights_on: true })
+    end
 
-      it 'recognizes literal: "false"' do
-        parses('false')
-      end
+    it 'unary proposition' do
+      interpret(text: 'not lights_on', interpretation: { lights_on: false })
+    end
 
-      it 'recognizes a variable' do
-        parses('lights_on')
-      end
+    it 'binary proposition' do
+      interpret(
+        text: 'doors_closed and lights_on',
+        interpretation: { lights_on: true, doors_closed: true }
+      )
+    end
 
-      it 'recognizes a unary proposition' do
-        parses('not lights_on')
-      end
-
-      it 'recognizes a binary proposition' do
-        parses('doors_closed and lights_on')
-      end
-
-      it 'recognizes a compound proposition' do
-        parses('doors_closed and lights_on or false')
-      end
-
+    it 'compound proposition' do
+      interpret(
+        text: 'doors_closed and lights_on or false',
+        interpretation: { lights_on: true, doors_closed: true }
+      )
     end
 
   end
