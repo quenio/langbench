@@ -1,8 +1,0 @@
-require 'lang/internal'
-require 'lang/external'
-require 'lang/logic'
-require 'lang/meta'
-require 'lang/tree'
-require 'lang/ui'
-require 'lang/xml'
-require 'lang/yaml'

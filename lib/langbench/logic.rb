@@ -20,5 +20,5 @@
 #++
 #
 
-module Langbench
-end
+require 'logic/proposition'
+require 'logic/predicate'
