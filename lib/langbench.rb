@@ -21,4 +21,5 @@
 #
 
 module Langbench
+  extend ActiveSupport::Autoload
 end
