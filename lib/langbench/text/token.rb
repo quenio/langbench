@@ -20,33 +20,31 @@
 #++
 #
 
-module Text
+module Langbench
+  module Text
+    class Token
+      attr_reader :category
+      attr_reader :text
 
-  class Token
+      def initialize(options = {})
+        @category = options.first[0]
+        @text = options.first[1]
+      end
 
-    attr_reader :category
-    attr_reader :text
+      def raw
+        { @category => @text }
+      end
 
-    def initialize(options = {})
-      @category = options.first[0]
-      @text = options.first[1]
+      def ==(other)
+        return false unless other.is_a? Token
+        return true if other.equal? self
+
+        @category == other.category and @text == other.text
+      end
+
+      def hash
+        (category.to_s + text.to_s).hash
+      end
     end
-
-    def raw
-      { @category => @text }
-    end
-
-    def ==(other)
-      return false unless other.is_a? Token
-      return true if other.equal? self
-
-      @category == other.category and @text == other.text
-    end
-
-    def hash
-      (category.to_s + text.to_s).hash
-    end
-
   end
-
 end

@@ -20,16 +20,18 @@
 #++
 #
 
-module Text::Renderer
+module Langbench
+  module Text
+    module Renderer
+      attr_reader :text
 
-  attr_reader :text
+      def init_text_rendering
+        @text = ''
+      end
 
-  def init_text_rendering
-    @text = ''
+      def print(value)
+        @text << value
+      end
+    end
   end
-
-  def print(value)
-    @text << value
-  end
-
 end

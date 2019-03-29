@@ -20,8 +20,6 @@
 #++
 #
 
-require 'logic/proposition'
-
 RSpec.describe Logic::Proposition do
 
   def interpret(params)

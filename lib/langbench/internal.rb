@@ -1,19 +1,17 @@
-module Lang::Internal
+module Langbench
+  module Internal
+    class Syntax
+      attr_reader :visitor
 
-  class Syntax
+      def self.evaluate(options = {}, &source_code)
+        new(options).instance_eval &source_code
+      end
 
-    attr_reader :visitor
+      private
 
-    def self.evaluate(options = {}, &source_code)
-      new(options).instance_eval &source_code
+      def initialize(options = {})
+        @visitor = options[:visitor]
+      end
     end
-
-    private
-
-    def initialize(options = {})
-      @visitor = options[:visitor]
-    end
-
   end
-
 end

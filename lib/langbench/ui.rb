@@ -20,10 +20,8 @@
 #++
 #
 
-require 'lang/yaml'
-require 'lang/tree'
-
-module Lang::UI
+module Langbench
+  module UI
 
   class View
 
@@ -312,4 +310,5 @@ module Lang::UI
     Module.new(options)
   end
 
+  end
 end

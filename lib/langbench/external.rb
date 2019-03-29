@@ -20,15 +20,9 @@
 #++
 #
 
-require 'text/tokenizer'
-require 'text/parser'
-
-module Lang
-
+module Langbench
   module External
-
     module Syntax
-
       def self.included(mod)
         mod.extend self
       end
@@ -70,10 +64,7 @@ module Lang
         )
         parser.parse(options[:text])
       end
-
     end
-
   end
-
 end
 

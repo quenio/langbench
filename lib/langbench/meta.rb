@@ -20,10 +20,8 @@
 #++
 #
 
-module Lang
-
+module Langbench
   module Meta
-
     module Visitor
 
       def enter_node(_name, _attributes = {}, &_block)
@@ -39,7 +37,5 @@ module Lang
       end
 
     end
-
   end
-
 end

@@ -20,21 +20,20 @@
 #++
 #
 
-require 'yaml'
-require 'text/file'
+module Langbench
+  module YAML
 
-module Lang::YAML
+    include Text::File
 
-  include Text::File
+    EXT = 'yml'.freeze
 
-  EXT = 'yml'.freeze
+    def yaml_file(path)
+      yaml(file(path))
+    end
 
-  def yaml_file(path)
-    yaml(file(path))
+    def yaml(text)
+      ::YAML.safe_load(text)
+    end
+
   end
-
-  def yaml(text)
-    ::YAML.safe_load(text)
-  end
-
 end

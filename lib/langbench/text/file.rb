@@ -20,15 +20,17 @@
 #++
 #
 
-module Text::File
+module Langbench
+  module Text
+    module File
+      def file(path)
+        File.open(path, 'r').read
+      end
 
-  def file(path)
-    File.open(path, 'r').read
+      def write_file(path, text)
+        FileUtils.makedirs(File.dirname(path)) unless Dir.exists?(File.dirname(path))
+        File.open(path, 'w') { |file| file.write(text) }
+      end
+    end
   end
-
-  def write_file(path, text)
-    FileUtils.makedirs(File.dirname(path)) unless Dir.exists?(File.dirname(path))
-    File.open(path, 'w') { |file| file.write(text) }
-  end
-
 end
