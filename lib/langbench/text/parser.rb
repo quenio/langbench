@@ -20,6 +20,8 @@
 #++
 #
 
+require 'langbench/text/grammar'
+
 module Langbench
   module Text
     class Parser

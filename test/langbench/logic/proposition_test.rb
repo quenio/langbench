@@ -20,178 +20,93 @@
 #++
 #
 
-RSpec.describe Logic::Proposition do
+require 'langbench/test'
 
+class PropositionTest < Test
   def interpret(params)
-    errors, value = Logic::Proposition.interpret(params)
-    expect(errors).to eq([])
+    errors, value = Langbench::Logic::Proposition.interpret(params)
+    assert_empty errors
     if params[:value].nil?
-      expect(value).to eq(true)
+      assert value
     else
-      expect(value).to eq(params[:value])
+      assert_equal params[:value], value
     end
   end
 
-  describe '#interpret' do
-
-    describe 'literal' do
-
-      it 'is true' do
-        interpret(text: 'true')
-      end
-
-      it 'is false' do
-        interpret(text: 'false', value: false)
-      end
-
+  def test_literal
+    [['false', false], ['true', true]].each do |text, value|
+      interpret(text: text, value: value)
     end
-
-    describe 'variable' do
-
-      it 'is true' do
-        interpret(text: 'lights_on', interpretation: { lights_on: true })
-      end
-
-      it 'is false' do
-        interpret(text: 'lights_on', interpretation: { lights_on: false }, value: false)
-      end
-
-    end
-
-    describe '"not" proposition' do
-
-      it 'is true' do
-        interpret(text: 'not lights_on', interpretation: { lights_on: false })
-      end
-
-      it 'is false' do
-        interpret(text: 'not lights_on', interpretation: { lights_on: true }, value: false)
-      end
-
-    end
-
-    describe '"and" proposition' do
-
-      it 'is true' do
-        interpret(
-          text: 'doors_closed and lights_on',
-          interpretation: { lights_on: true, doors_closed: true }
-        )
-      end
-
-      it 'is false' do
-        [[true, false], [false, true], [false, false]].each do |lights_on, doors_closed|
-          interpret(
-            text: 'doors_closed and lights_on',
-            interpretation: { lights_on: lights_on, doors_closed: doors_closed },
-            value: false
-          )
-        end
-      end
-
-    end
-
-    describe '"or" proposition' do
-
-      it 'is true' do
-        [[true, true], [true, false], [false, true]].each do |lights_on, doors_closed|
-          interpret(
-            text: 'doors_closed or lights_on',
-            interpretation: { lights_on: lights_on, doors_closed: doors_closed }
-          )
-        end
-      end
-
-      it 'is false' do
-        interpret(
-          text: 'doors_closed or lights_on',
-          interpretation: { lights_on: false, doors_closed: false },
-          value: false
-        )
-      end
-
-    end
-
-    describe '"if" proposition' do
-
-      it 'is true' do
-        [[true, true], [false, true], [false, false]].each do |lights_on, doors_closed|
-          interpret(
-            text: 'doors_closed if lights_on',
-            interpretation: { lights_on: lights_on, doors_closed: doors_closed }
-          )
-        end
-      end
-
-      it 'is false' do
-        interpret(
-          text: 'doors_closed if lights_on',
-          interpretation: { lights_on: true, doors_closed: false },
-          value: false
-        )
-      end
-
-    end
-
-    describe '"iif" proposition' do
-
-      it 'is true' do
-        [[true, true], [false, false]].each do |lights_on, doors_closed|
-          interpret(
-            text: 'doors_closed iif lights_on',
-            interpretation: { lights_on: lights_on, doors_closed: doors_closed }
-          )
-        end
-      end
-
-      it 'is false' do
-        [[true, false], [false, true]].each do |lights_on, doors_closed|
-          interpret(
-            text: 'doors_closed iif lights_on',
-            interpretation: { lights_on: lights_on, doors_closed: doors_closed },
-            value: false
-          )
-        end
-      end
-
-    end
-
-    describe 'compound proposition' do
-
-      it 'is true' do
-        interpret(
-          text: 'doors_closed and lights_on or false',
-          interpretation: { lights_on: true, doors_closed: true }
-        )
-      end
-
-      it 'is false' do
-        interpret(
-          text: 'doors_closed and lights_on and false',
-          interpretation: { lights_on: true, doors_closed: true },
-          value: false
-        )
-      end
-
-    end
-
   end
 
-  describe '#sentence' do
-
-    describe '#satisfied_by' do
-
-      it 'compound proposition' do
-        expect(
-          Logic::Proposition.sentence('doors_closed and lights_on').satisfied_by?(
-            lights_on: true,
-            doors_closed: true
-          )
-        ).to eq(true)
-      end
-
+  def test_variable
+    [false, true].each do |value|
+      interpret(text: 'lights_on', interpretation: { lights_on: value }, value: value)
     end
-
   end
 
+  def test_not
+    [false, true].each do |value|
+      interpret(text: 'not lights_on', interpretation: { lights_on: value }, value: (not value))
+    end
+  end
+
+  def test_and
+    cases = [[true, false, false], [false, true, false], [false, false, false], [true, true, true]]
+    cases.each do |lights_on, doors_closed, value|
+      interpret(
+        text: 'doors_closed and lights_on',
+        interpretation: { lights_on: lights_on, doors_closed: doors_closed },
+        value: value
+      )
+    end
+  end
+
+  def test_or
+    cases = [[true, true, true], [false, true, true], [true, false, true], [false, false, false]]
+    cases.each do |lights_on, doors_closed, value|
+      interpret(
+        text: 'doors_closed or lights_on',
+        interpretation: { lights_on: lights_on, doors_closed: doors_closed },
+        value: value
+      )
+    end
+  end
+
+  def test_if
+    cases = [[true, false, false], [true, true, true], [false, true, true], [false, false, true]]
+    cases.each do |lights_on, doors_closed, value|
+      interpret(
+        text: 'doors_closed if lights_on',
+        interpretation: { lights_on: lights_on, doors_closed: doors_closed },
+        value: value
+      )
+    end
+  end
+
+  def test_iif
+    cases = [[true, true, true], [false, false, true], [false, true, false], [true, false, false]]
+    cases.each do |lights_on, doors_closed, value|
+      interpret(
+        text: 'doors_closed iif lights_on',
+        interpretation: { lights_on: lights_on, doors_closed: doors_closed },
+        value: value
+      )
+    end
+  end
+
+  def test_compound_or
+    interpret(
+      text: 'doors_closed and lights_on or false',
+      interpretation: { lights_on: true, doors_closed: true }
+    )
+  end
+
+  def test_compound_and
+    interpret(
+      text: 'doors_closed and lights_on and false',
+      interpretation: { lights_on: true, doors_closed: true },
+      value: false
+    )
+  end
 end

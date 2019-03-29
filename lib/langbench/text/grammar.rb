@@ -23,9 +23,7 @@
 module Langbench
   module Text
     class Grammar
-
       class Rule
-
         attr_reader :grammar
         attr_reader :name
         attr_reader :terms

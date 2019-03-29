@@ -20,12 +20,13 @@
 #++
 #
 
+require 'langbench/external'
+
 module Langbench
   module Logic
     module Proposition
       module Syntax
-
-        include Lang::External::Syntax
+        include External::Syntax
 
         skip /\s*/
 
@@ -53,11 +54,9 @@ module Langbench
         after :binary_proposition do |attributes, interpreter|
           interpreter.evaluate_binary_proposition(attributes)
         end
-
       end
 
       class Interpreter
-
         class << self
           attr_accessor :interpretation
         end
@@ -150,7 +149,6 @@ module Langbench
 
           @values.push(@interpretation[proposition_infix.to_sym][@values.pop][@values.pop])
         end
-
       end
 
       def self.interpret(params = {})
@@ -163,7 +161,6 @@ module Langbench
       end
 
       class Sentence
-
         def initialize(text)
           @text = text
         end
@@ -175,7 +172,6 @@ module Langbench
           )
           errors.empty? and value
         end
-
       end
 
       def self.sentence(text)

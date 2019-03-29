@@ -20,6 +20,8 @@
 #++
 #
 
+require 'langbench/text/token'
+
 module Langbench
   module Text
     class Tokenizer
