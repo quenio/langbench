@@ -20,11 +20,4 @@
 #++
 #
 
-require 'active_support/dependencies/autoload'
-
-module Langbench
-  extend ActiveSupport::Autoload
-
-  autoload :Text
-  autoload :Logic
-end
+Dir.glob(File.expand_path('text/*.rb', __dir__)).each(&method(:require))
