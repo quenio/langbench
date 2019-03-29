@@ -20,6 +20,9 @@
 #++
 #
 
+# lib = File.expand_path("../lib", __FILE__)
+# $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 Gem::Specification.new do |spec|
   spec.name          = 'langbench'
   spec.version       = '0.1.0'.freeze
@@ -60,8 +63,8 @@ Gem::Specification.new do |spec|
   # https://github.com/ruby/rake
   spec.add_development_dependency 'rake', '~> 10.0'
 
-  # http://rspec.info
-  spec.add_development_dependency 'rspec', '~> 3.0'
+  # https://www.rubydoc.info/gems/minitest/5.8.4
+  spec.add_development_dependency 'minitest', '~> 5.0'
 
   # RubyMine Debugger
   spec.add_development_dependency 'debase', '~> 0.2.2'
