@@ -20,11 +20,11 @@
 #++
 #
 
-require 'langbench/test'
+require 'lang_bench/test'
 
 class PropositionTest < Test
   def interpret(params)
-    errors, value = Langbench::Logic::Proposition.interpret(params)
+    errors, value = LangBench::Logic::Proposition.interpret(params)
     assert_empty errors
     if params[:value].nil?
       assert value

@@ -20,7 +20,7 @@
 #++
 #
 
-require 'langbench/test'
+require 'lang_bench/test'
 
 class ParserTest < Test
   def tokens
@@ -42,8 +42,8 @@ class ParserTest < Test
   end
 
   def parse(params)
-    parser = Langbench::Text::Parser.new(
-      tokenizer: Langbench::Text::Tokenizer.new(skip: /\s+/, rules: tokens),
+    parser = LangBench::Text::Parser.new(
+      tokenizer: LangBench::Text::Tokenizer.new(skip: /\s+/, rules: tokens),
       grammar: grammar
     )
     errors = parser.parse(params[:given])
