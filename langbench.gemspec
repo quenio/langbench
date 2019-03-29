@@ -25,12 +25,12 @@
 
 Gem::Specification.new do |spec|
   spec.name          = 'langbench'
-  spec.version       = '0.1.0'.freeze
+  spec.version       = '0.1.0'
   spec.authors       = ['Quenio dos Santos']
   spec.email         = ['queniodossantos@gmail.com']
 
-  spec.summary       = 'Langbench - The Language Workbench Framework'
-  spec.description   = 'Use Langbench to create your own languages.'
+  spec.summary       = 'Langbench - Ruby-Based Language Workbench'
+  spec.description   = 'Use Langbench to create your own languages in Ruby.'
   spec.homepage      = 'https://github.com/quenio/langbench'
   spec.license       = 'MIT'
 
