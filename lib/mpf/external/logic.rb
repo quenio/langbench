@@ -2,10 +2,16 @@ require 'mpf/external'
 
 module MPF::External::Logic
 
-  class Syntax < MPF::External::Syntax
+  module Syntax
 
-    # Issue: statement below not seen by subclasses:
-    tokens variable: /[a-z][a-z0-9_]*/
+    include MPF::External::Syntax
+
+    def self.included(mod)
+      mod.extend self
+
+      mod.skip /\s*/
+      mod.tokens variable: /[a-z][a-z0-9_]*/
+    end
 
   end
 

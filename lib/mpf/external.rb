@@ -6,47 +6,45 @@ module MPF
 
   module External
 
-    class Syntax
+    module Syntax
 
-      class << self
-        attr_accessor :skip_regex
-        attr_accessor :token_rules
-        attr_accessor :grammar_rules
-        attr_accessor :pre_actions
-        attr_accessor :post_actions
+      def self.included(mod)
+        mod.extend self
       end
 
-      def self.skip(regex)
+      def skip(regex)
         @skip_regex = regex
       end
 
-      def self.tokens(rules = {})
-        @token_rules = rules
+      def tokens(rules = {})
+        @token_rules ||= {}
+        @token_rules = rules.dup.merge(@token_rules)
       end
 
-      def self.grammar(rules = {})
-        @grammar_rules = rules
+      def grammar(rules = {})
+        @grammar_rules ||= {}
+        @grammar_rules = @grammar_rules.merge(rules)
       end
 
-      def self.before(rule_name, &block)
+      def before(rule_name, &block)
         (@pre_actions ||= {})[rule_name] = block
       end
 
-      def self.after(rule_name, &block)
+      def after(rule_name, &block)
         (@post_actions ||= {})[rule_name] = block
       end
 
       def parse(options = {})
         tokenizer = Text::Tokenizer.new(
-          skip: self.class.skip_regex,
-          rules: self.class.token_rules
+          skip: @skip_regex,
+          rules: @token_rules
         )
         parser = Parser.new(
           tokenizer: tokenizer,
-          grammar: self.class.grammar_rules,
+          grammar: @grammar_rules,
           visitor: options[:visitor],
-          pre_actions: self.class.pre_actions,
-          post_actions: self.class.post_actions,
+          pre_actions: @pre_actions,
+          post_actions: @post_actions,
           ignore_actions: options[:ignore_actions]
         )
         parser.parse(options[:text])
