@@ -20,11 +20,17 @@
 #++
 #
 
-require 'active_support/dependencies/autoload'
+module LangBench
+  module Text
+    module File
+      def file(path)
+        File.open(path, 'r').read
+      end
 
-module Langbench
-  extend ActiveSupport::Autoload
-
-  autoload :Text
-  autoload :Logic
+      def write_file(path, text)
+        FileUtils.makedirs(File.dirname(path)) unless Dir.exists?(File.dirname(path))
+        File.open(path, 'w') { |file| file.write(text) }
+      end
+    end
+  end
 end

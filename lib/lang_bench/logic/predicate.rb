@@ -20,57 +20,30 @@
 #++
 #
 
-module Langbench
-  module Text
-    class Parser
-      module Tree
+require 'lang_bench/logic/proposition'
 
-        module Template
+module LangBench
+  module Logic
+    module Predicate
+      module Syntax
+        include Logic::Proposition::Syntax
+      end
 
-          def opened_node(name, attributes)
-            "#{name}{#{attributes_list(attributes)}}"
-          end
+      class Interpreter < Proposition::Interpreter
 
-          def closed_node(name, attributes)
-            "/#{name}{#{attributes_list(attributes)}}"
-          end
-
-          def inner_content(value)
-            value.to_s
-          end
-
-          def attributes_list(attributes)
-            result = attributes.map { |attrib| "#{attrib[0]}=#{attrib[1].inspect}" }.join(', ')
-            result = ' ' + result + ' ' unless result.empty?
-            result
-          end
-
+        def initialize(interpretation)
+          super(interpretation)
         end
 
-        class Printer
+      end
 
-          include Meta::Visitor
-          include Template
-          include Text::Printer
-
-          def initialize
-            init_indentation
-          end
-
-          def enter_node(name, attributes = {})
-            enter_section
-            indent_print opened_node(name, attributes)
-            indent
-          end
-
-          def exit_node(name, attributes = {})
-            unindent
-            indent_print closed_node(name, attributes)
-            exit_section
-          end
-
-        end
-
+      def self.interpret(params = {})
+        # printer = Lang::External::ParseTree::Printer.new
+        # errors = Syntax.new.parse(text: params[:text], visitor: printer, ignore_actions: true)
+        # [errors, true]
+        interpreter = Interpreter.new(params[:interpretation] || {})
+        errors = Syntax.parse(text: params[:text], visitor: interpreter)
+        [errors, interpreter.values.pop]
       end
     end
   end

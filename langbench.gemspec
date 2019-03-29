@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Quenio dos Santos']
   spec.email         = ['queniodossantos@gmail.com']
 
-  spec.summary       = 'Langbench - Ruby-Based Language Workbench'
+  spec.summary       = 'LangBench - Ruby-Based Language Workbench'
   spec.description   = 'Use Langbench to create your own languages in Ruby.'
   spec.homepage      = 'https://github.com/quenio/langbench'
   spec.license       = 'MIT'

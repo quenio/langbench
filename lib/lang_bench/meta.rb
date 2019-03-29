@@ -20,17 +20,22 @@
 #++
 #
 
-module Langbench
-  module Text
-    module File
-      def file(path)
-        File.open(path, 'r').read
+module LangBench
+  module Meta
+    module Visitor
+
+      def enter_node(_name, _attributes = {}, &_block)
+        raise 'Not implemented.'
       end
 
-      def write_file(path, text)
-        FileUtils.makedirs(File.dirname(path)) unless Dir.exists?(File.dirname(path))
-        File.open(path, 'w') { |file| file.write(text) }
+      def exit_node(_name, _attributes = {}, &_block)
+        raise 'Not implemented.'
       end
+
+      def visit_content(_value)
+        raise 'Not implemented.'
+      end
+
     end
   end
 end

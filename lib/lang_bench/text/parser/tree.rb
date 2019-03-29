@@ -20,30 +20,57 @@
 #++
 #
 
-module Langbench
+module LangBench
   module Text
-    class Token
-      attr_reader :category
-      attr_reader :text
+    class Parser
+      module Tree
 
-      def initialize(options = {})
-        @category = options.first[0]
-        @text = options.first[1]
-      end
+        module Template
 
-      def raw
-        { @category => @text }
-      end
+          def opened_node(name, attributes)
+            "#{name}{#{attributes_list(attributes)}}"
+          end
 
-      def ==(other)
-        return false unless other.is_a? Token
-        return true if other.equal? self
+          def closed_node(name, attributes)
+            "/#{name}{#{attributes_list(attributes)}}"
+          end
 
-        @category == other.category and @text == other.text
-      end
+          def inner_content(value)
+            value.to_s
+          end
 
-      def hash
-        (category.to_s + text.to_s).hash
+          def attributes_list(attributes)
+            result = attributes.map { |attrib| "#{attrib[0]}=#{attrib[1].inspect}" }.join(', ')
+            result = ' ' + result + ' ' unless result.empty?
+            result
+          end
+
+        end
+
+        class Printer
+
+          include Meta::Visitor
+          include Template
+          include Text::Printer
+
+          def initialize
+            init_indentation
+          end
+
+          def enter_node(name, attributes = {})
+            enter_section
+            indent_print opened_node(name, attributes)
+            indent
+          end
+
+          def exit_node(name, attributes = {})
+            unindent
+            indent_print closed_node(name, attributes)
+            exit_section
+          end
+
+        end
+
       end
     end
   end

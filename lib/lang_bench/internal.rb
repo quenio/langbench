@@ -1,4 +1,4 @@
-module Langbench
+module LangBench
   module Internal
     class Syntax
       attr_reader :visitor

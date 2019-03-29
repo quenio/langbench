@@ -20,9 +20,9 @@
 #++
 #
 
-require 'langbench/text/grammar'
+require 'lang_bench/text/grammar'
 
-module Langbench
+module LangBench
   module Text
     class Parser
 

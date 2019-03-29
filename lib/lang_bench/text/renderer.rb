@@ -20,30 +20,17 @@
 #++
 #
 
-require 'langbench/logic/proposition'
+module LangBench
+  module Text
+    module Renderer
+      attr_reader :text
 
-module Langbench
-  module Logic
-    module Predicate
-      module Syntax
-        include Logic::Proposition::Syntax
+      def init_text_rendering
+        @text = ''
       end
 
-      class Interpreter < Proposition::Interpreter
-
-        def initialize(interpretation)
-          super(interpretation)
-        end
-
-      end
-
-      def self.interpret(params = {})
-        # printer = Lang::External::ParseTree::Printer.new
-        # errors = Syntax.new.parse(text: params[:text], visitor: printer, ignore_actions: true)
-        # [errors, true]
-        interpreter = Interpreter.new(params[:interpretation] || {})
-        errors = Syntax.parse(text: params[:text], visitor: interpreter)
-        [errors, interpreter.values.pop]
+      def print(value)
+        @text << value
       end
     end
   end

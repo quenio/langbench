@@ -20,9 +20,9 @@
 #++
 #
 
-require 'langbench/external'
+require 'lang_bench/external'
 
-module Langbench
+module LangBench
   module Logic
     module Proposition
       module Syntax

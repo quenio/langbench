@@ -20,7 +20,7 @@
 #++
 #
 
-module Langbench
+module LangBench
   module Tree
 
     class Syntax < Internal::Syntax

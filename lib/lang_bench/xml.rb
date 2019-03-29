@@ -22,11 +22,9 @@
 
 module Langbench
   module XML
-
-    EXT = 'xml'.freeze
+    EXT = 'xml'
 
     class Syntax < External::Syntax
-
       tokens etag_open: '</'
 
       grammar start: %i[sp? element sp?],
@@ -66,11 +64,9 @@ module Langbench
       after :content do |attributes, visitor|
         visitor.visit_content(attributes[:data]) if attributes.any? and attributes[:data]
       end
-
     end
 
     module Template
-
       def open_markup(name, attributes)
         "<#{name}#{attributes_list(attributes)}>"
       end
@@ -88,11 +84,9 @@ module Langbench
         result = ' ' + result unless result.empty?
         result
       end
-
     end
 
     class Printer
-
       include Meta::Visitor
       include Text::Printer
       include Template
@@ -121,19 +115,15 @@ module Langbench
         indent_print close_markup(name)
         exit_section
       end
-
     end
 
     class Renderer < Printer
-
       include Text::Renderer
 
       def initialize
         super
         init_text_rendering
       end
-
     end
-
   end
 end

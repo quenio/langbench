@@ -20,7 +20,7 @@
 #++
 #
 
-module Langbench
+module LangBench
   module Text
     class Grammar
       class Rule

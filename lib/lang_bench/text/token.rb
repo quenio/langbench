@@ -20,54 +20,31 @@
 #++
 #
 
-require 'langbench/text/tokenizer'
-require 'langbench/text/parser'
+module LangBench
+  module Text
+    class Token
+      attr_reader :category
+      attr_reader :text
 
-module Langbench
-  module External
-    module Syntax
-      def self.included(mod)
-        mod.extend self
+      def initialize(options = {})
+        @category = options.first[0]
+        @text = options.first[1]
       end
 
-      def skip(regex)
-        @skip_regex = regex
+      def raw
+        { @category => @text }
       end
 
-      def tokens(rules = {})
-        @token_rules ||= {}
-        @token_rules = rules.dup.merge(@token_rules)
+      def ==(other)
+        return false unless other.is_a? Token
+        return true if other.equal? self
+
+        @category == other.category and @text == other.text
       end
 
-      def grammar(rules = {})
-        @grammar_rules ||= {}
-        @grammar_rules = @grammar_rules.merge(rules)
-      end
-
-      def before(rule_name, &block)
-        (@pre_actions ||= {})[rule_name] = block
-      end
-
-      def after(rule_name, &block)
-        (@post_actions ||= {})[rule_name] = block
-      end
-
-      def parse(options = {})
-        tokenizer = Text::Tokenizer.new(
-          skip: @skip_regex,
-          rules: @token_rules
-        )
-        parser = Text::Parser.new(
-          tokenizer: tokenizer,
-          grammar: @grammar_rules,
-          visitor: options[:visitor],
-          pre_actions: @pre_actions,
-          post_actions: @post_actions,
-          ignore_actions: options[:ignore_actions]
-        )
-        parser.parse(options[:text])
+      def hash
+        (category.to_s + text.to_s).hash
       end
     end
   end
 end
-

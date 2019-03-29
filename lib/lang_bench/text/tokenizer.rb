@@ -20,9 +20,9 @@
 #++
 #
 
-require 'langbench/text/token'
+require 'lang_bench/text/token'
 
-module Langbench
+module LangBench
   module Text
     class Tokenizer
       attr_accessor :rules
