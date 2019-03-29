@@ -1,17 +1,21 @@
-module Lang::Meta
+module Lang
 
-  module Visitor
+  module Meta
 
-    def enter_node(_name, _attributes = {}, &_block)
-      raise 'Not implemented.'
-    end
+    module Visitor
 
-    def exit_node(_name, _attributes = {}, &_block)
-      raise 'Not implemented.'
-    end
+      def enter_node(_name, _attributes = {}, &_block)
+        raise 'Not implemented.'
+      end
 
-    def visit_content(_value)
-      raise 'Not implemented.'
+      def exit_node(_name, _attributes = {}, &_block)
+        raise 'Not implemented.'
+      end
+
+      def visit_content(_value)
+        raise 'Not implemented.'
+      end
+
     end
 
   end

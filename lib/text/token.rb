@@ -1,26 +1,30 @@
-class Text::Token
+module Text
 
-  attr_reader :category
-  attr_reader :text
+  class Token
 
-  def initialize(options = {})
-    @category = options.first[0]
-    @text = options.first[1]
-  end
+    attr_reader :category
+    attr_reader :text
 
-  def raw
-    { @category => @text }
-  end
+    def initialize(options = {})
+      @category = options.first[0]
+      @text = options.first[1]
+    end
 
-  def ==(other)
-    return false unless other.is_a? Token
-    return true if other.equal? self
+    def raw
+      { @category => @text }
+    end
 
-    @category == other.category and @text == other.text
-  end
+    def ==(other)
+      return false unless other.is_a? Token
+      return true if other.equal? self
 
-  def hash
-    (category.to_s + text.to_s).hash
+      @category == other.category and @text == other.text
+    end
+
+    def hash
+      (category.to_s + text.to_s).hash
+    end
+
   end
 
 end

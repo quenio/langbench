@@ -1,11 +1,9 @@
-require 'lang/logic/proposition'
+require 'logic/proposition'
 
-RSpec.describe Lang::Logic::Proposition do
-
-  include Lang::Logic::Proposition
+RSpec.describe Logic::Proposition do
 
   def interpret(params)
-    errors, value = interpret(params)
+    errors, value = Logic::Proposition.interpret(params)
     expect(errors).to eq([])
     if params[:value].nil?
       expect(value).to eq(true)
@@ -165,7 +163,7 @@ RSpec.describe Lang::Logic::Proposition do
 
       it 'compound proposition' do
         expect(
-          Propositional.sentence('doors_closed and lights_on').satisfied_by?(
+          Logic::Proposition.sentence('doors_closed and lights_on').satisfied_by?(
             lights_on: true,
             doors_closed: true
           )

@@ -1,92 +1,80 @@
-require 'mpf/external/text'
+require 'text/tokenizer'
 
-module MPF
+RSpec.describe Tokenizer do
 
-  module External
+  describe 'skip!' do
 
-    module Text
+    it 'skips digits' do
+      tokenizer = Tokenizer.new(skip: /\d*/)
+      source = '234token'
 
-      RSpec.describe Tokenizer do
+      tokenizer.skip!(source)
 
-        describe 'skip!' do
+      expect(source).to eq('token')
+    end
 
-          it 'skips digits' do
-            tokenizer = Tokenizer.new(skip: /\d*/)
-            source = '234token'
+  end
 
-            tokenizer.skip!(source)
+  describe 'next_token' do
 
-            expect(source).to eq('token')
-          end
+    it 'finds next token with given single rule' do
+      tokenizer = Tokenizer.new(rules: { id: /[a-z]+/ })
+      source = 'token'
 
-        end
+      token = tokenizer.next_token(source)
 
-        describe 'next_token' do
+      expect(source).to eq('token')
+      expect(token).to eq(Token.new(id: 'token'))
+    end
 
-          it 'finds next token with given single rule' do
-            tokenizer = Tokenizer.new(rules: { id: /[a-z]+/ })
-            source = 'token'
+  end
 
-            token = tokenizer.next_token(source)
+  describe 'next!' do
 
-            expect(source).to eq('token')
-            expect(token).to eq(Token.new(id: 'token'))
-          end
+    it 'finds next token with given two rules' do
+      tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
+      source = 'token1234'
 
-        end
+      tokens = tokenizer.next!(source)
+      expect(source).to eq('1234')
+      expect(tokens).to eq(Token.new(id: 'token'))
 
-        describe 'next!' do
+      tokens = tokenizer.next!(source)
+      expect(source).to eq('')
+      expect(tokens).to eq(Token.new(number: '1234'))
+    end
 
-          it 'finds next token with given two rules' do
-            tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
-            source = 'token1234'
+    it 'does not find next token if not initial match' do
+      tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
+      source = '  token1234'
 
-            tokens = tokenizer.next!(source)
-            expect(source).to eq('1234')
-            expect(tokens).to eq(Token.new(id: 'token'))
+      tokens = tokenizer.next!(source)
+      expect(source).to eq(' token1234')
+      expect(tokens).to eq(Token.new(char: ' '))
+    end
 
-            tokens = tokenizer.next!(source)
-            expect(source).to eq('')
-            expect(tokens).to eq(Token.new(number: '1234'))
-          end
+  end
 
-          it 'does not find next token if not initial match' do
-            tokenizer = Text::Tokenizer.new(rules: { id: /[a-z]+/, number: /[0-9]+/ })
-            source = '  token1234'
+  describe 'tokenize' do
 
-            tokens = tokenizer.next!(source)
-            expect(source).to eq(' token1234')
-            expect(tokens).to eq(Token.new(char: ' '))
-          end
+    it 'finds all tokens' do
+      tokenizer = Text::Tokenizer.new(
+        skip: /\s*/,
+        rules: { id: /[a-z]+/, number: /[0-9]+/ }
+      )
+      source = '  1234  <token>   '
 
-        end
+      tokens = tokenizer.tokenize(source)
 
-        describe 'tokenize' do
-
-          it 'finds all tokens' do
-            tokenizer = Text::Tokenizer.new(
-              skip: /\s*/,
-              rules: { id: /[a-z]+/, number: /[0-9]+/ }
-            )
-            source = '  1234  <token>   '
-
-            tokens = tokenizer.tokenize(source)
-
-            expect(source).to eq('  1234  <token>   ')
-            expect(tokens).to eq(
-                                [
-                                  Token.new(number: '1234'),
-                                  Token.new(char: '<'),
-                                  Token.new(id: 'token'),
-                                  Token.new(char: '>')
-                                ]
-                              )
-          end
-
-        end
-
-      end
-
+      expect(source).to eq('  1234  <token>   ')
+      expect(tokens).to eq(
+                          [
+                            Token.new(number: '1234'),
+                            Token.new(char: '<'),
+                            Token.new(id: 'token'),
+                            Token.new(char: '>')
+                          ]
+                        )
     end
 
   end

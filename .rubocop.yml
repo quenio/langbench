@@ -4,8 +4,8 @@ AllCops:
 Metrics/LineLength:
   Max: 100
 
-Style/ClassAndModuleChildren:
-  Enabled: false
+Metrics/BlockLength:
+  Max: 400
 
 Style/EmptyMethod:
   Enabled: false
