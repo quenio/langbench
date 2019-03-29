@@ -1,10 +1,10 @@
-require 'mpf/external'
+require 'lang/external'
 
-module MPF::External::Logic
+module Lang::Logic
 
   module Syntax
 
-    include MPF::External::Syntax
+    include Lang::External::Syntax
 
     def self.included(mod)
       mod.extend self

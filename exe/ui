@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
-require 'mpf/ui'
+require 'lang/ui'
 
-MPF::UI.module(path: Dir.pwd).compile target_dir_path: ARGV[0]
+Langbench::UI.module(path: Dir.pwd).compile target_dir_path: ARGV[0]

@@ -1,17 +1,17 @@
-# mpf.gemspec
+# langbench.gemspec
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'mpf'
+require 'langbench'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'mpf'
-  spec.version       = MPF::VERSION
+  spec.name          = 'langbench'
+  spec.version       = Langbench::VERSION
   spec.authors       = ['Quenio dos Santos']
   spec.email         = ['queniodossantos@gmail.com']
 
-  spec.summary       = 'MPF - Metaprogramming Framework'
-  spec.description   = 'Use MPF to create your own languages.'
-  spec.homepage      = 'https://github.com/quenio/mpf'
+  spec.summary       = 'Langbench - The Language Workbench Framework'
+  spec.description   = 'Use Langbench to create your own languages.'
+  spec.homepage      = 'https://github.com/quenio/langbench'
   spec.license       = 'MIT'
 
   spec.required_ruby_version = '>= 2.6.0'
@@ -22,8 +22,8 @@ Gem::Specification.new do |spec|
   # to allow pushing to a single host or delete this section to allow pushing to any host.
   spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['source_code_uri'] = 'https://github.com/quenio/mpf'
-  spec.metadata['changelog_uri'] = 'https://github.com/quenio/mpf/CHANGELOG.md'
+  spec.metadata['source_code_uri'] = 'https://github.com/quenio/langbench'
+  spec.metadata['changelog_uri'] = 'https://github.com/quenio/langbench/CHANGELOG.md'
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.

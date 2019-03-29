@@ -1,3 +1,3 @@
-module MPF
+module Langbench
   VERSION = '0.1.0'.freeze
 end

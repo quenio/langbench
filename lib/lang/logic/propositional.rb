@@ -1,11 +1,11 @@
-require 'mpf/external/parse_tree'
-require 'mpf/external/logic'
+require 'text/parser/tree'
+require 'lang/logic'
 
-module MPF::External::Logic::Propositional
+module Lang::Logic::Propositional
 
   module Syntax
 
-    include MPF::External::Logic::Syntax
+    include Logic::Syntax
 
     def self.included(mod)
       mod.extend self
@@ -150,7 +150,7 @@ module MPF::External::Logic::Propositional
     end
 
     def satisfied_by?(interpretation = {})
-      errors, value = MPF::External::Logic::Propositional.interpret(
+      errors, value = Propositional.interpret(
         text: @text,
         interpretation: interpretation
       )

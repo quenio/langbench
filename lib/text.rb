@@ -1,0 +1,6 @@
+require 'text/file'
+require 'text/grammar'
+require 'text/parser'
+require 'text/printer'
+require 'text/token'
+require 'text/tokenizer'

@@ -1,15 +1,15 @@
-require 'mpf/external/parse_tree'
-require 'mpf/external/logic/propositional'
+require 'text/parser/tree'
+require 'lang/logic/propositional'
 
-module MPF::External::Logic::Predicate
+module Lang::Logic::Predicate
 
   module Syntax
 
-    include MPF::External::Logic::Propositional::Syntax
+    include Propositional::Syntax
 
   end
 
-  class Interpreter < MPF::External::Logic::Propositional::Interpreter
+  class Interpreter < Propositional::Interpreter
 
     def initialize(interpretation)
       super(interpretation)
@@ -18,7 +18,7 @@ module MPF::External::Logic::Predicate
   end
 
   def self.interpret(params = {})
-    # printer = MPF::External::ParseTree::Printer.new
+    # printer = Lang::External::ParseTree::Printer.new
     # errors = Syntax.new.parse(text: params[:text], visitor: printer, ignore_actions: true)
     # [errors, true]
     interpreter = Interpreter.new(params[:interpretation] || {})
