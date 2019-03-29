@@ -11,9 +11,9 @@ module Logic
       skip /\s*/
 
       tokens proposition_literal: /true|false/,
-             proposition_variable: /[a-z][a-z0-9_]*/,
              proposition_prefix: /not/,
-             proposition_infix: /and|or|if|iif/
+             proposition_infix: /and|or|if|iif/,
+             proposition_variable: /[a-z][a-z0-9_]*/
 
       grammar proposition: %i[basic_proposition binary_proposition*],
               basic_proposition:
@@ -109,7 +109,7 @@ module Logic
       end
 
       def evaluate_basic_proposition(attributes = {})
-        variable_name = attributes[:variable]
+        variable_name = attributes[:proposition_variable]
         literal_name = attributes[:proposition_literal]
         @values.push(@interpretation[variable_name.to_sym]) if variable_name
         @values.push(@interpretation[literal_name.to_sym]) if literal_name
