@@ -37,6 +37,7 @@ module LangBench
         @ignore_actions = options[:ignore_actions] || false
         @action_context = Object.new unless @ignore_actions
         @text = ''
+        @token = nil
       end
 
       def parse(text)

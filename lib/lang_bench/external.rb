@@ -30,6 +30,13 @@ module LangBench
         mod.extend self
       end
 
+      attr_accessor :skip_regex
+      attr_accessor :token_rules
+      attr_accessor :grammar_rules
+      attr_accessor :token_rules
+      attr_accessor :pre_actions
+      attr_accessor :post_actions
+
       def skip(params = {})
         @skip_regex = params[:regex]
       end
@@ -54,15 +61,15 @@ module LangBench
 
       def parse(options = {})
         tokenizer = Text::Tokenizer.new(
-          skip: @skip_regex,
-          rules: @token_rules
+          skip: skip_regex,
+          rules: token_rules
         )
         parser = Text::Parser.new(
           tokenizer: tokenizer,
-          grammar: @grammar_rules,
+          grammar: grammar_rules,
           visitor: options[:visitor],
-          pre_actions: @pre_actions,
-          post_actions: @post_actions,
+          pre_actions: pre_actions,
+          post_actions: post_actions,
           ignore_actions: options[:ignore_actions]
         )
         parser.parse(options[:text])
