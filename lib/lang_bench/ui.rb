@@ -273,7 +273,6 @@ module LangBench
         target_dir_path = options[:target_dir_path] || "#{@root_dir.path}/target"
 
         view_names.each do |view_name|
-          print "Compiling: #{view_name}\n"
           view(view_name).compile target_dir_path: target_dir_path, locales: locales
         end
       end
