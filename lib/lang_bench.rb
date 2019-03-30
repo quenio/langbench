@@ -20,7 +20,7 @@
 #++
 #
 
-require 'active_support/dependencies/autoload'
+require 'active_support'
 
 module LangBench
   extend ActiveSupport::Autoload
