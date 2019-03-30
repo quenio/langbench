@@ -1,0 +1,8 @@
+<view>
+  <navigation>
+    <item title="Contas" otherTitle="Contas" view="another_view"></item>
+    <item title="Prestações" otherTitle="Contas" view="another_view"></item>
+    <item title="Despesas" otherTitle="Contas" view="another_view"></item>
+    <item title="Mercado" otherTitle="Contas" view="another_view"></item>
+  </navigation>
+</view>

@@ -20,12 +20,14 @@
 #++
 #
 
-module Langbench
-  module YAML
+require 'yaml'
+require 'lang_bench/text/file'
 
+module LangBench
+  module YAML
     include Text::File
 
-    EXT = 'yml'.freeze
+    EXT = 'yml'
 
     def yaml_file(path)
       yaml(file(path))

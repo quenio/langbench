@@ -29,4 +29,5 @@ module LangBench
   autoload :Tree
   autoload :XML
   autoload :Logic
+  autoload :UI
 end

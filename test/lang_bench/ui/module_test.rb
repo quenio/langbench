@@ -20,17 +20,42 @@
 #++
 #
 
-module LangBench
-  module Text
-    module File
-      def file(path)
-        ::File.open(path, 'r').read
-      end
+require 'lang_bench/test'
 
-      def write_file(path, text)
-        ::FileUtils.makedirs(::File.dirname(path)) unless ::Dir.exists?(::File.dirname(path))
-        ::File.open(path, 'w') { |file| file.write(text) }
-      end
+class ModuleTest < Test
+  include LangBench::Text::File
+
+  ROOT = 'test/lang_bench/ui/example_module'
+
+  def root_path
+    File.expand_path(ROOT)
+  end
+
+  def target_path
+    "#{root_path}/target"
+  end
+
+  def expected_target_path
+    "#{root_path}/expected_target"
+  end
+
+  def expected_target_files
+    Dir.glob("#{expected_target_path}/**/*")
+       .map { |path| File.expand_path(path) }
+       .reject { |path| File.directory?(path) }
+  end
+
+  def compare_target_files
+    expected_target_files.each do |expected_file_path|
+      actual_file_path = "#{target_path}#{expected_file_path.sub(expected_target_path, '')}"
+      assert File.exists?(actual_file_path)
+      assert_equal file(expected_file_path), file(actual_file_path), actual_file_path
     end
   end
+
+  def test_compile
+    LangBench::UI.module(path: ROOT).compile
+    compare_target_files
+  end
 end
+

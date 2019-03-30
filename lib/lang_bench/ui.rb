@@ -20,10 +20,11 @@
 #++
 #
 
+require 'lang_bench/yaml'
+
 module LangBench
   module UI
     class View
-
       include YAML
 
       def initialize(options = {})
@@ -120,7 +121,7 @@ module LangBench
         end
 
         def new_line(syntax)
-          syntax.visitor.new_line if syntax.visitor.is_a? External::Text::Printer
+          syntax.visitor.new_line if syntax.visitor.is_a? Text::Printer
         end
 
         def split_children(children)
@@ -186,7 +187,7 @@ module LangBench
         end
 
         def tokenized_expressions_of(node)
-          tokenizer = External::Text::Tokenizer.new(
+          tokenizer = Text::Tokenizer.new(
             rules: {
               expr: /\$\.?([A-Za-z][A-Za-z0-9]*(\.[A-Za-z][A-Za-z0-9]*)*)?/,
               text: /[^$]*/
@@ -251,13 +252,10 @@ module LangBench
           keys = key.split('.')
           keys.reduce(@locale) { |locale, key| locale[key] }
         end
-
       end
-
     end
 
     class Module
-
       include YAML
 
       def initialize(options = {})

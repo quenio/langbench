@@ -1,0 +1,8 @@
+<view>
+  <navigation>
+    <item title="Bills" otherTitle="Bills" view="another_view"></item>
+    <item title="Installments" otherTitle="Bills" view="another_view"></item>
+    <item title="Expenses" otherTitle="Bills" view="another_view"></item>
+    <item title="Groceries" otherTitle="Bills" view="another_view"></item>
+  </navigation>
+</view>
