@@ -28,7 +28,7 @@ module LangBench
       end
 
       def write_file(path, text)
-        ::FileUtils.makedirs(::File.dirname(path)) unless ::Dir.exists?(::File.dirname(path))
+        ::FileUtils.makedirs(::File.dirname(path)) unless ::Dir.exist?(::File.dirname(path))
         ::File.open(path, 'w') { |file| file.write(text) }
       end
     end

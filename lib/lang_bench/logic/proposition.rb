@@ -28,7 +28,7 @@ module LangBench
       module Syntax
         include External::Syntax
 
-        skip /\s*/
+        skip regex: /\s*/
 
         tokens proposition_literal: /true|false/,
                proposition_prefix: /not/,

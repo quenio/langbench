@@ -52,7 +52,7 @@ module LangBench
 
       def config
         config_path = "#{@dir_path}/#{File.basename(@file_name, '.*')}.yml"
-        if File.exists? config_path
+        if File.exist? config_path
           yaml_file(config_path)
         else
           {}
@@ -286,7 +286,7 @@ module LangBench
       def locales
         locale_names.map do |locale_name|
           @locale_file_path = "#{@locales_dir_path}/#{locale_name}.#{YAML::EXT}"
-          [locale_name, File.exists?(@locale_file_path) ? yaml_file(@locale_file_path) : {}]
+          [locale_name, File.exist?(@locale_file_path) ? yaml_file(@locale_file_path) : {}]
         end.to_h
       end
 

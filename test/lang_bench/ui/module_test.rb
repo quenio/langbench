@@ -48,7 +48,7 @@ class ModuleTest < Test
   def compare_target_files
     expected_target_files.each do |expected_file_path|
       actual_file_path = "#{target_path}#{expected_file_path.sub(expected_target_path, '')}"
-      assert File.exists?(actual_file_path)
+      assert File.exist?(actual_file_path)
       assert_equal file(expected_file_path), file(actual_file_path), actual_file_path
     end
   end
