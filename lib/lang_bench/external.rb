@@ -30,12 +30,7 @@ module LangBench
         mod.extend self
       end
 
-      attr_accessor :skip_regex
-      attr_accessor :token_rules
-      attr_accessor :grammar_rules
-      attr_accessor :token_rules
-      attr_accessor :pre_actions
-      attr_accessor :post_actions
+      attr_accessor :skip_regex, :token_rules, :grammar_rules, :pre_actions, :post_actions
 
       def skip(params = {})
         @skip_regex = params[:regex]
