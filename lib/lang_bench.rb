@@ -26,5 +26,7 @@ module LangBench
   extend ActiveSupport::Autoload
 
   autoload :Text
+  autoload :Tree
+  autoload :XML
   autoload :Logic
 end

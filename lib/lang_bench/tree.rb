@@ -20,11 +20,12 @@
 #++
 #
 
+require 'lang_bench/internal'
+require 'lang_bench/xml'
+
 module LangBench
   module Tree
-
     class Syntax < Internal::Syntax
-
       def node(name, attributes = {}, &block)
         @visitor.enter_node(name, attributes, &block)
         if block
@@ -39,11 +40,9 @@ module LangBench
         @visitor.visit_content(value)
         nil
       end
-
     end
 
     class Node
-
       attr_reader :name
       attr_reader :attributes
       attr_reader :children
@@ -53,11 +52,9 @@ module LangBench
         @attributes = attributes
         @children = children
       end
-
     end
 
     class Builder
-
       include Meta::Visitor
 
       attr_reader :root
@@ -79,11 +76,9 @@ module LangBench
       def visit_content(value)
         @parent.last.children << value
       end
-
     end
 
     class Emitter
-
       attr_reader :root
 
       def initialize(root)
@@ -112,11 +107,9 @@ module LangBench
           syntax.content(node)
         end
       end
-
     end
 
     class Source
-
       def initialize(&source_code)
         @source_code = source_code
       end
@@ -136,7 +129,6 @@ module LangBench
       def build
         Tree.build(&@source_code)
       end
-
     end
 
     def self.source(&source_code)
@@ -161,7 +153,7 @@ module LangBench
       builder = Builder.new
       # printer = Language::External::ParseTree::Printer.new
       language = options[:from]
-      syntax = @syntax[language].new
+      syntax = @syntax[language]
       # errors = syntax.parse(text: options[:text], visitor: printer, ignore_actions: true)
       errors = syntax.parse(text: options[:text], visitor: builder)
       [builder.root, errors]
@@ -187,6 +179,5 @@ module LangBench
     def self.evaluate(options = {}, &source_code)
       Syntax.evaluate visitor: options[:visitor], &source_code
     end
-
   end
 end

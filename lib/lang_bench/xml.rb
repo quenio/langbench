@@ -20,11 +20,17 @@
 #++
 #
 
-module Langbench
+require 'lang_bench/meta'
+require 'lang_bench/external'
+
+module LangBench
   module XML
     EXT = 'xml'
 
-    class Syntax < External::Syntax
+    class Syntax
+
+      include External::Syntax
+
       tokens etag_open: '</'
 
       grammar start: %i[sp? element sp?],

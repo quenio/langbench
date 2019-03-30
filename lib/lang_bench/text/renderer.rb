@@ -26,7 +26,7 @@ module LangBench
       attr_reader :text
 
       def init_text_rendering
-        @text = ''
+        @text = +''
       end
 
       def print(value)

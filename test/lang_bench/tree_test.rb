@@ -20,56 +20,57 @@
 #++
 #
 
-require 'mpf/tree'
+require 'lang_bench/test'
 
-module MPF
+class TreeTest < Test
+  Tree = LangBench::Tree
+  Printer = LangBench::XML::Printer
 
-  source_code = Tree.source do
-    node(:html, lang: 'en') do
-      node(:head) do
-        node(:title) do
-          content 'Good '
-          node(:b) { 'Books' }
+  def source
+    Tree.source do
+      node(:html, lang: 'en') do
+        node(:head) do
+          node(:title) { content('Good ') || node(:b) { 'Books' } }
         end
-      end
-      node(:body) do
-        node(:div, class: 'header') do
-          node(:img, src: 'logo.png', alt: 'Books Logo')
+        node(:body) do
+          node(:div, class: 'header') { node(:img, src: 'logo.png', alt: 'Books Logo') }
         end
       end
     end
   end
 
-  source_code.print(to: :xml)
-  print "\n\n"
-
-  model = source_code.build
-  print model.inspect
-  print "\n\n"
-
-  source_code = Tree.emit(from: model)
-  source_code.print(to: :xml)
-  print "\n\n"
-
-  target_code = source_code.render(to: :xml)
-  print target_code
-  print "\n\n"
-
-  print">>> Parsing from XML:\n"
-  model, errors = Tree.parse(from: :xml, text: target_code)
-  if errors.empty?
-    Tree.emit(from: model).print(to: :xml)
-  else
-    errors.each { |error| print "\nError: #{error}" }
-  end
-  print "\n\n"
-
-  RSpec.describe Tree do
-    # it 'translates the layout elements to a div' do
-    #   # expected_target = '<div class="container"></div>'
-    #   # actual_target = StructLang.translate source: given_source, to: :xml
-    #   # expect(actual_target).to eq(expected_target)
-    # end
+  def xml_text
+    "\n" + <<~XML.strip
+      <html lang="en">
+        <head>
+          <title>Good <b>Books</b></title>
+        </head>
+        <body>
+          <div class="header">
+            <img src="logo.png" alt="Books Logo"></img>
+          </div>
+        </body>
+      </html>
+    XML
   end
 
+  def test_print
+    printed_text = +''
+    Spy.on_instance_method(Printer, :print).and_return do |text|
+      printed_text << text
+    end
+    source.print(to: :xml)
+    assert_equal xml_text, printed_text
+  ensure
+    Spy.off_instance_method(Printer, :print)
+  end
+
+  def test_build_emit_render
+    assert_equal xml_text, Tree.emit(from: source.build).render(to: :xml)
+  end
+
+  def test_parse_emit_render
+    model, _errors = Tree.parse(from: :xml, text: xml_text)
+    assert_equal xml_text, Tree.emit(from: model).render(to: :xml)
+  end
 end
