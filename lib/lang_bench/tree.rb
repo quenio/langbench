@@ -132,7 +132,7 @@ module LangBench
     end
 
     def self.source(&source_code)
-      Source.new &source_code
+      Source.new(&source_code)
     end
 
     def self.emit(options = {})

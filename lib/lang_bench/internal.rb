@@ -4,7 +4,7 @@ module LangBench
       attr_reader :visitor
 
       def self.evaluate(options = {}, &source_code)
-        new(options).instance_eval &source_code
+        new(options).instance_eval(&source_code)
       end
 
       private
