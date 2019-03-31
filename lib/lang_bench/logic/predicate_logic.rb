@@ -20,16 +20,16 @@
 #++
 #
 
-require 'lang_bench/logic/proposition'
+require 'lang_bench/logic/proposition_logic'
 
 module LangBench
   module Logic
-    module Predicate
+    module PredicateLogic
       module Syntax
-        include Logic::Proposition::Syntax
+        include Logic::PropositionLogic::Syntax
       end
 
-      class Interpreter < Proposition::Interpreter
+      class Interpreter < PropositionLogic::Interpreter
 
         def initialize(interpretation)
           super(interpretation)

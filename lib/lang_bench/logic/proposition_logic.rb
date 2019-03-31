@@ -24,7 +24,7 @@ require 'lang_bench/external'
 
 module LangBench
   module Logic
-    module Proposition
+    module PropositionLogic
       module Syntax
         include External::Syntax
 

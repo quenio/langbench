@@ -22,9 +22,9 @@
 
 require 'lang_bench/test'
 
-class PropositionTest < Test
+class PropositionLogicTest < Test
   def interpret(params)
-    errors, value = LangBench::Logic::Proposition.interpret(params)
+    errors, value = LangBench::Logic::PropositionLogic.interpret(params)
     assert_empty errors
     if params[:value].nil?
       assert value
