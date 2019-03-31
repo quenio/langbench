@@ -20,6 +20,8 @@
 #++
 #
 
+require 'lang_bench/logic/formula'
+
 module LangBench
   module Logic
     class Proposition < Formula
