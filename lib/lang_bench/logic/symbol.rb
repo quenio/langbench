@@ -22,7 +22,7 @@
 
 module LangBench
   module Logic
-    class Symbol
+    class Symbol < Model::Object
     end
   end
 end

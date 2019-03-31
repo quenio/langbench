@@ -22,7 +22,7 @@
 
 module LangBench
   module Logic
-    class Term
+    class Term < Model::Object
     end
   end
 end

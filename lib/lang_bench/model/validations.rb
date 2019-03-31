@@ -27,7 +27,16 @@ module LangBench
     module Validations
       class TypeValidator < ActiveModel::EachValidator
         def validate_each(record, attr_name, value)
-          record.errors.add(attr_name, :type, options) unless value.is_a? options[:with]
+          return if value.is_a? options[:with]
+
+          record.errors.add(attr_name, :type, options)
+        end
+      end
+      class ItemTypeValidator < ActiveModel::EachValidator
+        def validate_each(record, attr_name, value)
+          return if value.is_a? Enumerable and value.all? { |e| e.is_a? options[:with] }
+
+          record.errors.add(attr_name, :item_type, options)
         end
       end
     end

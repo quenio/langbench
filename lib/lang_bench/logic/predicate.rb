@@ -28,27 +28,8 @@ module LangBench
     class Predicate < Formula
       attr_accessor :symbol, :terms
 
-      def initialize(params = {})
-        @symbol = params[:symbol]
-        @terms = params[:terms]
-      ensure
-        valid_symbol
-        valid_terms
-      end
-
-      private
-
-      def valid_symbol
-        return if @symbol.is_a? Symbol
-
-        raise "Predicate#symbol must be instance of Symbol but found: #{@symbol.inspect}"
-      end
-
-      def valid_terms
-        return if @terms.all? { |t| t.is_a? Term }
-
-        raise "Predicate#terms must be instance of Term but found: #{@terms.inspect}"
-      end
+      validates :symbol, presence: true, type: Symbol
+      validates :terms, presence: true, item_type: Term
     end
   end
 end
