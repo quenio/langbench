@@ -23,11 +23,11 @@
 module LangBench
   module Logic
     class Signature
-      attr_reader :functions, :relations, :arity
+      attr_reader :functions, :predicates, :arity
 
       def initialize(params = {})
         @functions = params[:functions].to_set
-        @relations = params[:relations].to_set
+        @predicates = params[:predicates].to_set
         @arity = params[:arity].to_h
       ensure
         valid_arity_keys
@@ -35,9 +35,9 @@ module LangBench
       end
 
       def valid_arity_keys
-        return if @arity.keys.all? { |k| @functions.include? k or @relations.include? k }
+        return if @arity.keys.all? { |k| @functions.include? k or @predicates.include? k }
 
-        raise "arity.keys should have functions or relations but found: #{@arity.keys.inspect}"
+        raise "arity.keys should have functions or predicates but found: #{@arity.keys.inspect}"
       end
 
       def valid_arity_values
