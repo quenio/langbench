@@ -20,7 +20,11 @@
 #++
 #
 
-class Sentence
-  def well_formed?
+module LangBench
+  module Logic
+    class Sentence
+      def well_formed?
+      end
+    end
   end
 end

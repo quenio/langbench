@@ -20,13 +20,17 @@
 #++
 #
 
-class Language
-  attr_reader :signature
+module LangBench
+  module Logic
+    class Language
+      attr_reader :signature
 
-  def initialize(params = {})
-    @signature = params[:signature]
-  end
+      def initialize(params = {})
+        @signature = params[:signature]
+      end
 
-  def include?(sentence)
+      def include?(sentence)
+      end
+    end
   end
 end

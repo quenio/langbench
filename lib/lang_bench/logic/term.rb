@@ -20,5 +20,9 @@
 #++
 #
 
-class Term
+module LangBench
+  module Logic
+    class Term
+    end
+  end
 end

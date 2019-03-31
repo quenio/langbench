@@ -20,5 +20,9 @@
 #++
 #
 
-class Formula
+module LangBench
+  module Logic
+    class Formula
+    end
+  end
 end
