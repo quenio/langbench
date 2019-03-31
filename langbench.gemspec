@@ -54,6 +54,9 @@ Gem::Specification.new do |spec|
   # https://github.com/rails/rails/tree/master/activesupport
   spec.add_dependency 'activesupport', '~> 5.2.3'
 
+  # https://github.com/rails/rails/tree/master/activemodel
+  spec.add_dependency 'activemodel', '~> 5.2.3'
+
   # https://bundler.io
   spec.add_development_dependency 'bundler', '~> 2.0'
 
