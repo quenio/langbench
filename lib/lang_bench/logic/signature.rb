@@ -23,11 +23,11 @@
 module LangBench
   module Logic
     class Signature
-      attr_reader :functions, :predicates, :arity
+      attr_reader :function_symbols, :predicate_symbols, :arity
 
       def initialize(params = {})
-        @functions = params[:functions].to_set
-        @predicates = params[:predicates].to_set
+        @function_symbols = params[:function_symbols].to_set
+        @predicate_symbols = params[:predicate_symbols].to_set
         @arity = params[:arity].to_h
       ensure
         valid_arity_keys
@@ -35,13 +35,17 @@ module LangBench
       end
 
       def valid_arity_keys
-        return if @arity.keys.all? { |k| @functions.include? k or @predicates.include? k }
+        return if @arity.keys.all? do |k|
+          @function_symbols.include? k or @predicate_symbols.include? k
+        end
 
-        raise "arity.keys should have functions or predicates but found: #{@arity.keys.inspect}"
+        raise "arity.keys should have function/predicate symbols but found: #{@arity.keys.inspect}"
       end
 
       def valid_arity_values
-        return if @arity.values.all? { |v| v.is_a? Integer and v.positive? }
+        return if @arity.values.all? do |v|
+          v.is_a? Integer and v.positive?
+        end
 
         raise "arity.values should have positive integers but found: #{@arity.values.inspect}"
       end
