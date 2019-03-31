@@ -20,6 +20,8 @@
 #++
 #
 
+require 'lang_bench/logic/term'
+
 module LangBench
   module Logic
     class Variable < Term
