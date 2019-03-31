@@ -20,6 +20,8 @@
 #++
 #
 
+require 'lang_bench/logic/symbol'
+
 module LangBench
   module Logic
     class Signature
@@ -30,8 +32,24 @@ module LangBench
         @predicate_symbols = params[:predicate_symbols].to_set
         @arity = params[:arity].to_h
       ensure
+        valid_function_symbols
+        valid_predicate_symbols
         valid_arity_keys
         valid_arity_values
+      end
+
+      private
+
+      def valid_function_symbols
+        return if @function_symbols.all? { |s| s.is_a? Symbol }
+
+        raise "Signature#function_symbols must be instance of Symbol but found: #{@function_symbols.inspect}"
+      end
+
+      def valid_predicate_symbols
+        return if @predicate_symbols.all? { |s| s.is_a? Symbol }
+
+        raise "Signature#predicate_symbols must be instance of Symbol but found: #{@predicate_symbols.inspect}"
       end
 
       def valid_arity_keys
