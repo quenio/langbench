@@ -20,15 +20,16 @@
 #++
 #
 
-require 'active_support'
+require 'active_model'
 
 module LangBench
-  extend ActiveSupport::Autoload
-
-  autoload :Logic
-  autoload :Model
-  autoload :Text
-  autoload :Tree
-  autoload :UI
-  autoload :XML
+  module Model
+    module Validations
+      class TypeValidator < ActiveModel::EachValidator
+        def validate_each(record, attr_name, value)
+          record.errors.add(attr_name, :type, options) unless value.is_a? options[:with]
+        end
+      end
+    end
+  end
 end

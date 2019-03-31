@@ -21,13 +21,14 @@
 #
 
 require 'active_model'
+require 'lang_bench/model/validations'
 
 module LangBench
-  module Validations
-    class TypeValidator < ActiveModel::EachValidator
-      def validate_each(record, attr_name, value)
-        record.errors.add(attr_name, :type, options) unless value.is_a? options[:with]
-      end
+  module Model
+    class Object
+      include ActiveModel::Model
+      include Validations
     end
   end
 end
+

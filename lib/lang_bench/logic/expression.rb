@@ -20,14 +20,9 @@
 #++
 #
 
-require 'active_model'
-require 'lang_bench/validations'
-
 module LangBench
   module Logic
-    class Expression
-      include ActiveModel::Model
-      include Validations
+    class Expression < Model::Object
     end
   end
 end

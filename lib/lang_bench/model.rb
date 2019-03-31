@@ -20,15 +20,4 @@
 #++
 #
 
-require 'active_support'
-
-module LangBench
-  extend ActiveSupport::Autoload
-
-  autoload :Logic
-  autoload :Model
-  autoload :Text
-  autoload :Tree
-  autoload :UI
-  autoload :XML
-end
+Dir.glob(File.expand_path('model/*.rb', __dir__)).each(&method(:require))
