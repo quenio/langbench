@@ -20,9 +20,6 @@
 #++
 #
 
-require 'lang_bench/internal'
-require 'lang_bench/xml'
-
 module LangBench
   module Tree
     class Syntax < Internal::Syntax

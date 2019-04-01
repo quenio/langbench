@@ -21,7 +21,6 @@
 #
 
 require 'yaml'
-require 'lang_bench/text/file'
 
 module LangBench
   module YAML

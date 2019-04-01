@@ -26,7 +26,7 @@ module LangBench
   module Logic
     module PredicateLogic
       module Syntax
-        include Logic::PropositionLogic::Syntax
+        include PropositionLogic::Syntax
       end
 
       class Interpreter < PropositionLogic::Interpreter

@@ -20,9 +20,6 @@
 #++
 #
 
-require 'lang_bench/meta'
-require 'lang_bench/external'
-
 module LangBench
   module XML
     EXT = 'xml'

@@ -20,8 +20,6 @@
 #++
 #
 
-require 'lang_bench/external'
-
 module LangBench
   module Logic
     module PropositionLogic

@@ -20,8 +20,6 @@
 #++
 #
 
-require 'lang_bench/yaml'
-
 module LangBench
   module UI
     class View

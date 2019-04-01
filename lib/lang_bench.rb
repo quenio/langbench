@@ -25,10 +25,14 @@ require 'active_support'
 module LangBench
   extend ActiveSupport::Autoload
 
+  autoload :External
+  autoload :Internal
   autoload :Logic
+  autoload :Meta
   autoload :Model
   autoload :Text
   autoload :Tree
   autoload :UI
   autoload :XML
+  autoload :YAML
 end

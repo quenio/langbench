@@ -20,9 +20,6 @@
 #++
 #
 
-require 'lang_bench/text/tokenizer'
-require 'lang_bench/text/parser'
-
 module LangBench
   module External
     module Syntax
