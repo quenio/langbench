@@ -30,6 +30,8 @@ module LangBench
   autoload :Logic
   autoload :Meta
   autoload :Model
+  autoload :Predicate
+  autoload :Proposition
   autoload :Text
   autoload :Tree
   autoload :UI

@@ -20,31 +20,27 @@
 #++
 #
 
-require 'lang_bench/logic/proposition'
-
 module LangBench
-  module Logic
-    module Predicate
-      module Syntax
-        include Proposition::Syntax
+  module Predicate
+    module Syntax
+      include Proposition::Syntax
+    end
+
+    class Interpreter < Proposition::Interpreter
+
+      def initialize(interpretation)
+        super(interpretation)
       end
 
-      class Interpreter < Proposition::Interpreter
+    end
 
-        def initialize(interpretation)
-          super(interpretation)
-        end
-
-      end
-
-      def self.interpret(params = {})
-        # printer = Lang::External::ParseTree::Printer.new
-        # errors = Syntax.new.parse(text: params[:text], visitor: printer, ignore_actions: true)
-        # [errors, true]
-        interpreter = Interpreter.new(params[:interpretation] || {})
-        errors = Syntax.parse(text: params[:text], visitor: interpreter)
-        [errors, interpreter.values.pop]
-      end
+    def self.interpret(params = {})
+      # printer = Lang::External::ParseTree::Printer.new
+      # errors = Syntax.new.parse(text: params[:text], visitor: printer, ignore_actions: true)
+      # [errors, true]
+      interpreter = Interpreter.new(params[:interpretation] || {})
+      errors = Syntax.parse(text: params[:text], visitor: interpreter)
+      [errors, interpreter.values.pop]
     end
   end
 end
