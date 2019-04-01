@@ -20,7 +20,7 @@
 #++
 #
 
-require 'lang_bench/logic/proposition_logic'
+require 'lang_bench/logic/proposition'
 
 module LangBench
   module Logic
