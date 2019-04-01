@@ -24,7 +24,7 @@ require 'lang_bench/logic/term'
 
 module LangBench
   module Logic
-    class Literal < Term
+    class Constant < Term
       attr_accessor :symbol
 
       validates :symbol, presence: true, type: Symbol
