@@ -39,13 +39,13 @@ module LangBench
       private
 
       def arity_keys_valid?
-        @arity&.keys&.all? do |k|
+        arity&.keys&.all? do |k|
           @function_symbols.include? k or @predicate_symbols.include? k
         end
       end
 
       def arity_values_valid?
-        @arity&.values&.all? do |v|
+        arity&.values&.all? do |v|
           v.is_a? Integer and v.positive?
         end
       end

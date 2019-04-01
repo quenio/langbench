@@ -20,6 +20,8 @@
 #++
 #
 
+require 'lang_bench/logic/expression'
+
 module LangBench
   module Logic
     class Term < Expression
