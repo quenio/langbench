@@ -24,12 +24,12 @@ require 'lang_bench/logic/proposition'
 
 module LangBench
   module Logic
-    module PredicateLogic
+    module Predicate
       module Syntax
-        include PropositionLogic::Syntax
+        include Proposition::Syntax
       end
 
-      class Interpreter < PropositionLogic::Interpreter
+      class Interpreter < Proposition::Interpreter
 
         def initialize(interpretation)
           super(interpretation)

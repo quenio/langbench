@@ -24,7 +24,7 @@ require 'lang_bench/test'
 
 class PropositionLogicTest < Test
   def interpret(params)
-    errors, value = LangBench::Logic::PropositionLogic.interpret(params)
+    errors, value = LangBench::Logic::Proposition.interpret(params)
     assert_empty errors
     if params[:value].nil?
       assert value

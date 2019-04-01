@@ -22,7 +22,7 @@
 
 module LangBench
   module Logic
-    module PropositionLogic
+    module Proposition
       module Syntax
         include External::Syntax
 
