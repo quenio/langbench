@@ -24,7 +24,6 @@ require 'lang_bench/test'
 
 class ApplicationTest < Test
   Application = LangBench::Logic::Application
-  Symbol = LangBench::Logic::Symbol
   Term = LangBench::Logic::Term
 
   def test_symbol_presence
@@ -40,19 +39,19 @@ class ApplicationTest < Test
   end
 
   def test_terms_presence
-    predicate = Application.new(symbol: Symbol.new) # missing terms
+    predicate = Application.new(symbol: :some_symbol) # missing terms
     assert predicate.invalid?
     assert predicate.errors.added? :terms, :blank
   end
 
   def test_terms_enumerable
-    predicate = Application.new(symbol: Symbol.new, terms: 'not enumerable')
+    predicate = Application.new(symbol: :some_symbol, terms: 'not enumerable')
     assert predicate.invalid?
     assert predicate.errors.added? :terms, :item_type, with: Term
   end
 
   def test_terms_item_type
-    predicate = Application.new(symbol: Symbol.new, terms: [Term.new, 'not term'])
+    predicate = Application.new(symbol: :some_symbol, terms: [Term.new, 'not term'])
     assert predicate.invalid?
     assert predicate.errors.added? :terms, :item_type, with: Term
   end
@@ -64,7 +63,7 @@ class ApplicationTest < Test
   end
 
   def test_valid
-    predicate = Application.new(symbol: Symbol.new, terms: [Term.new])
+    predicate = Application.new(symbol: :some_symbol, terms: [Term.new])
     assert predicate.valid?
     assert predicate.errors.empty?
   end

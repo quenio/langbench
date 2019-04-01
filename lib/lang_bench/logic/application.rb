@@ -20,7 +20,6 @@
 #++
 #
 
-require 'lang_bench/logic/symbol'
 require 'lang_bench/logic/term'
 
 module LangBench

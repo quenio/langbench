@@ -20,8 +20,6 @@
 #++
 #
 
-require 'lang_bench/logic/symbol'
-
 module LangBench
   module Logic
     class Signature
