@@ -20,35 +20,24 @@
 #++
 #
 
-require 'lang_bench/model/object'
+require 'lang_bench/test'
 
-module LangBench
-  module Logic
-    class Signature < Model::Object
-      attr_accessor :function_symbols, :predicate_symbols, :arity
+class SignatureTest < Test
+  Signature = LangBench::Logic::Signature
 
-      validates :function_symbols, presence: true, type: Set, item_type: Symbol
-      validates :predicate_symbols, presence: true, type: Set, item_type: Symbol
-      validates :arity, presence: true
+  def test_empty
+    signature = Signature.new
+    assert signature.invalid?
+    assert_equal 9, signature.errors.size
+  end
 
-      validate do
-        errors.add(:arity, :arity_keys) unless arity_keys_valid?
-        errors.add(:arity, :arity_values) unless arity_values_valid?
-      end
-
-      private
-
-      def arity_keys_valid?
-        @arity&.keys&.all? do |k|
-          @function_symbols.include? k or @predicate_symbols.include? k
-        end
-      end
-
-      def arity_values_valid?
-        @arity&.values&.all? do |v|
-          v.is_a? Integer and v.positive?
-        end
-      end
-    end
+  def test_valid
+    signature = Signature.new(
+      function_symbols: [:func].to_set,
+      predicate_symbols: [:pred].to_set,
+      arity: { func: 1, pred: 2 }
+    )
+    assert signature.valid?
+    assert signature.errors.empty?
   end
 end
