@@ -21,10 +21,16 @@
 #
 
 require 'lang_bench/logic/expression'
+require 'lang_bench/logic/quantifier'
+require 'lang_bench/logic/term'
 
 module LangBench
   module Logic
     class Formula < Expression
+      attr_accessor :quantifier, :term
+
+      validates :quantifier, type: Quantifier
+      validates :term, presence: true, type: Term
     end
   end
 end

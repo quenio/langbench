@@ -20,17 +20,40 @@
 #++
 #
 
-require 'lang_bench/logic/symbol'
-require 'lang_bench/logic/variable'
+require 'lang_bench/test'
 
-module LangBench
-  module Logic
-    class Quantifier < Expression
-      attr_accessor :symbol, :variable
+class FormulaTest < Test
+  Formula = LangBench::Logic::Formula
+  Quantifier = LangBench::Logic::Quantifier
+  Term = LangBench::Logic::Term
 
-      validates :symbol, presence: true, type: Symbol
-      validates :variable, presence: true, type: Variable
-    end
+  def test_quantifier_type
+    formula = Formula.new(quantifier: 'not a quantifier', term: Term.new)
+    assert formula.invalid?
+    assert formula.errors.added? :quantifier, :type, with: Quantifier
+  end
+
+  def test_term_presence
+    formula = Formula.new(quantifier: Quantifier.new) # missing term
+    assert formula.invalid?
+    assert formula.errors.added? :term, :blank
+  end
+
+  def test_term_type
+    formula = Formula.new(quantifier: Quantifier.new, term: 'a')
+    assert formula.invalid?
+    assert formula.errors.added? :term, :type, with: Term
+  end
+
+  def test_empty
+    formula = Formula.new
+    assert formula.invalid?
+    assert_equal 3, formula.errors.size
+  end
+
+  def test_valid
+    formula = Formula.new(quantifier: Quantifier.new, term: Term.new)
+    assert formula.valid?
+    assert formula.errors.empty?
   end
 end
-
