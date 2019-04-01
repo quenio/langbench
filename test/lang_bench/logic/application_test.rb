@@ -22,49 +22,49 @@
 
 require 'lang_bench/test'
 
-class PredicateTest < Test
-  Predicate = LangBench::Logic::Predicate
+class ApplicationTest < Test
+  Application = LangBench::Logic::Application
   Symbol = LangBench::Logic::Symbol
   Term = LangBench::Logic::Term
 
   def test_symbol_presence
-    predicate = Predicate.new(terms: [Term.new]) # missing symbol
+    predicate = Application.new(terms: [Term.new]) # missing symbol
     assert predicate.invalid?
     assert predicate.errors.added? :symbol, :blank
   end
 
   def test_symbol_type
-    predicate = Predicate.new(symbol: 'not a symbol')
+    predicate = Application.new(symbol: 'not a symbol')
     assert predicate.invalid?
     assert predicate.errors.added? :symbol, :type, with: Symbol
   end
 
   def test_terms_presence
-    predicate = Predicate.new(symbol: Symbol.new) # missing terms
+    predicate = Application.new(symbol: Symbol.new) # missing terms
     assert predicate.invalid?
     assert predicate.errors.added? :terms, :blank
   end
 
   def test_terms_enumerable
-    predicate = Predicate.new(symbol: Symbol.new, terms: 'not enumerable')
+    predicate = Application.new(symbol: Symbol.new, terms: 'not enumerable')
     assert predicate.invalid?
     assert predicate.errors.added? :terms, :item_type, with: Term
   end
 
   def test_terms_item_type
-    predicate = Predicate.new(symbol: Symbol.new, terms: [Term.new, 'not term'])
+    predicate = Application.new(symbol: Symbol.new, terms: [Term.new, 'not term'])
     assert predicate.invalid?
     assert predicate.errors.added? :terms, :item_type, with: Term
   end
 
   def test_empty
-    predicate = Predicate.new
+    predicate = Application.new
     assert predicate.invalid?
     assert_equal 4, predicate.errors.size
   end
 
   def test_valid
-    predicate = Predicate.new(symbol: Symbol.new, terms: [Term.new])
+    predicate = Application.new(symbol: Symbol.new, terms: [Term.new])
     assert predicate.valid?
     assert predicate.errors.empty?
   end

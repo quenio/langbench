@@ -21,11 +21,11 @@
 #
 
 require 'lang_bench/logic/symbol'
-require 'lang_bench/logic/formula'
+require 'lang_bench/logic/term'
 
 module LangBench
   module Logic
-    class Predicate < Formula
+    class Application < Term
       attr_accessor :symbol, :terms
 
       validates :symbol, presence: true, type: Symbol
