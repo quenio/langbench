@@ -31,6 +31,10 @@ module LangBench
 
       validates :quantifier, type: Quantifier
       validates :term, presence: true, type: Term
+
+      def sentence?
+        # TODO: Should return false if term contains one or more free variables.
+      end
     end
   end
 end
